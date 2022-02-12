@@ -1,0 +1,41 @@
+{
+  "cacheVersion": "8.8.0_04fe1a8a7846c33d4eecd913032976ecd0c76fb0",
+  "fileVersions": [
+    [
+      "inlineSnapshot.test.ts",
+      ""
+    ],
+    [
+      "guide/SoundPlayer.ts",
+      ""
+    ],
+    [
+      "guide/SoundPlayerConsumer.ts",
+      ""
+    ],
+    [
+      "guide/01-automatic-mock.test.ts",
+      ""
+    ],
+    [
+      "guide/03-factory-constructor-mock.test.ts",
+      ""
+    ],
+    [
+      "guide/02-manual-mock/SoundPlayer.ts",
+      ""
+    ],
+    [
+      "guide/02-manual-mock/__mocks__/SoundPlayer.ts",
+      ""
+    ],
+    [
+      "guide/02-manual-mock/SoundPlayerConsumer.ts",
+      ""
+    ],
+    [
+      "guide/02-manual-mock/SoundPlayerConsumer.test.ts",
+      ""
+    ]
+  ]
+}

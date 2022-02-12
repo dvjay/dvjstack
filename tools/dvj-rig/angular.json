@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "pnpm"
+  },
+  "newProjectRoot": "../..",
+  "projects": {
+    "nw-graph-angular": {
+      "projectType": "library",
+      "root": "../../libs/nw-graph-angular",
+      "sourceRoot": "../../libs/nw-graph-angular/src",
+      "prefix": "dvj",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "../../libs/nw-graph-angular/tsconfig.lib.json",
+            "project": "../../libs/nw-graph-angular/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "../../libs/nw-graph-angular/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "../../libs/nw-graph-angular/tsconfig.lib.json",
+              "../../libs/nw-graph-angular/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "nw-graph-angular"
+}
