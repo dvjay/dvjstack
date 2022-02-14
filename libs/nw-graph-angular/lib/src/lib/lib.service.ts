@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
-export class NwGraphAngularService {
+export class MyLibService {
 
   constructor() { }
 }

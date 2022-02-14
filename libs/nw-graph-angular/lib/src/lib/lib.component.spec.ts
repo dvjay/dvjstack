@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NwGraphAngularComponent } from './nw-graph-angular.component';
+import { MyLibComponent } from './lib.component';
 
-describe('NwGraphAngularComponent', () => {
-  let component: NwGraphAngularComponent;
-  let fixture: ComponentFixture<NwGraphAngularComponent>;
+describe('MyLibComponent', () => {
+  let component: MyLibComponent;
+  let fixture: ComponentFixture<MyLibComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NwGraphAngularComponent ]
+      declarations: [ MyLibComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NwGraphAngularComponent);
+    fixture = TestBed.createComponent(MyLibComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

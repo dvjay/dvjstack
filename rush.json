@@ -458,6 +458,17 @@
     //   "reviewCategory": "tools"
     // }
     {
+      "packageName": "dvj-rig",
+      "projectFolder": "tools/dvj-rig",
+      "cyclicDependencyProjects": ["nw-graph-angular"],
+      "shouldPublish": false
+    },
+    {
+      "packageName": "nw-graph-angular",
+      "projectFolder": "libs/nw-graph-angular",
+      "shouldPublish": true
+    },
+    {
       "packageName": "nw-common",
       "projectFolder": "libs/nw-common",
       "shouldPublish": false
