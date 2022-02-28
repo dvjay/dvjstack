@@ -1,4 +1,4 @@
-# MyLib
+# Lib
 
 This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.14.
 
@@ -17,7 +17,7 @@ After building your library with `ng build lib`, go to the dist folder `cd dist/
 
 ## Running unit tests
 
-Run `ng test lib` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `ng test lib` to execute the unit tests
 
 ## Further help
 

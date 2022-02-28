@@ -10,7 +10,7 @@ import { Component, OnInit } from '@angular/core';
   styles: [
   ]
 })
-export class MyLibComponent implements OnInit {
+export class LibComponent implements OnInit {
 
   constructor() { }
 
