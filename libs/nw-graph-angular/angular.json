@@ -5,23 +5,23 @@
     "packageManager": "pnpm",
     "defaultCollection": "@angular-eslint/schematics"
   },
-  "newProjectRoot": ".",
+  "newProjectRoot": "../../libs",
   "projects": {
-    "lib": {
+    "nw-graph-angular": {
       "projectType": "library",
-      "root": "lib",
-      "sourceRoot": "lib/src",
+      "root": ".",
+      "sourceRoot": "src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "tsConfig": "lib/tsconfig.lib.json",
-            "project": "lib/ng-package.json"
+            "tsConfig": "tsconfig.lib.json",
+            "project": "ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "lib/tsconfig.lib.prod.json"
+              "tsConfig": "tsconfig.lib.prod.json"
             }
           }
         },
@@ -29,13 +29,13 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": [
-              "lib/**/*.ts",
-              "lib/**/*.html"
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
           }
         }
       }
     }
   },
-  "defaultProject": "lib"
+  "defaultProject": "nw-graph-angular"
 }

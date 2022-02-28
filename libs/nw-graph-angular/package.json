@@ -1,28 +1,28 @@
 {
   "name": "nw-graph-angular",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build nw-graph-angular",
     "test": "ng test",
     "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
+    "tslib": "^2.0.0"
+  },
+  "devDependencies": {
+    "@angular/common": "^11.2.14",
+    "@angular/core": "^11.2.14",
     "@angular/animations": "~11.2.14",
-    "@angular/common": "~11.2.14",
     "@angular/compiler": "~11.2.14",
-    "@angular/core": "~11.2.14",
     "@angular/forms": "~11.2.14",
     "@angular/platform-browser": "~11.2.14",
     "@angular/platform-browser-dynamic": "~11.2.14",
     "@angular/router": "~11.2.14",
     "rxjs": "~6.6.0",
-    "tslib": "^2.0.0",
-    "zone.js": "~0.11.3"
-  },
-  "devDependencies": {
+    "zone.js": "~0.11.3",
     "@angular-devkit/build-angular": "~0.1102.18",
     "@angular-eslint/builder": "4.3.1",
     "@angular-eslint/eslint-plugin": "4.3.1",
@@ -42,5 +42,9 @@
     "protractor": "~7.0.0",
     "ts-node": "~8.3.0",
     "typescript": "~4.1.5"
+  },
+  "peerDependencies": {
+    "@angular/common": "^11.2.14",
+    "@angular/core": "^11.2.14"
   }
 }

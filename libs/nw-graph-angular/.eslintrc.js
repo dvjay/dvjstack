@@ -1,10 +1,13 @@
 module.exports = {
-  ignorePatterns: ["lib/**/*"],
+  ignorePatterns: ["!**/*"],
   overrides: [
     {
       files: ["*.ts"],
       parserOptions: {
-        project: ["tsconfig.json", "e2e/tsconfig.json"],
+        project: [
+          "tsconfig.lib.json",
+          "tsconfig.spec.json"
+        ],
         createDefaultProgram: true,
       },
       extends: [
