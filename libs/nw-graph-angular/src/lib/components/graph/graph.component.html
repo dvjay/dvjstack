@@ -1,0 +1,89 @@
+<div class='graph-section-container' #graphcontainer [style.height.px]='options.height'>
+    <div class='graph-svg-section' [style.height.px]='options.height'>
+        <svg #svg [attr.width]='options.width - SVG_MARGIN' [attr.height]='options.height - SVG_MARGIN' (click)='viewportClick()'> 
+            <defs> 
+                <marker *ngIf="displayEdgeDirection" id='arrowhead' viewBox='0 0 10 10' refX='7' refY='5' markerUnits='strokeWidth' 
+                        markerWidth='8' markerHeight='6' orient='auto'>
+                    <path d='M 0 0 L 10 5 L 0 10 z' stroke='none' fill='#595959' /> 
+                </marker> 
+                <filter x='0' y='0' width='1' height='1' id='bg-text'>
+                    <feFlood flood-color='white' flood-opacity='1' />
+                    <feComposite in='SourceGraphic' operator='xor' /> 
+                </filter> 
+            </defs>
+            <g *ngIf="(highlightedNodeIds$ | async) as hlNodeIds">
+                <g [zoomableOf]='svg' id='nw-root' [layoutId]="layoutId" [transformVal]="transformVal" #zoomablecontainer *ngIf="(selectedNodeIds$ | async) as selNodeIds">
+                    <g [link]="link" 
+                        [layoutId]="layoutId" 
+                        [rootNodeId]="rootNodeId" 
+                        [hideLabel]="hideLabel$ | async"
+                        [selectedNodeIds]="selNodeIds"
+                        [highlightedNodeIds]="hlNodeIds"
+                        *ngFor="let link of links">
+                    </g> 
+                    <g [node]="node"
+                        [nodes]="nodes" 
+                        [layoutId]="layoutId"
+                        [graph]="graphEngineService" 
+                        *ngFor="let node of nodes; let indexOfNode=index; trackBy: trackItem" 
+                        [rootNodeId]="rootNodeId" 
+                        [selectedNodeIds]="selNodeIds"
+                        [highlightedNodeIds]="hlNodeIds"
+                        [hideLabel]="hideLabel$ | async" 
+                        (expandNode)="expandNode($event)" 
+                        (focus)="latestFocusedNode=node" 
+                        (contextmenu)="onOpenContextMenu($event, node, indexOfNode); $event.preventDefault();"
+                        (selectNode)="selectNode($event)" 
+                        (selectOnlyClickedNode)="selectOnlyClickedNode($event)" 
+                        style="outline: none"
+                        cdkOverlayOrigin #noderef="cdkOverlayOrigin">
+                    </g>
+                    <g [node-label]="node" style="outline: none" [layoutId]="layoutId" [rootNodeId]="rootNodeId" [hideLabel]="hideLabel$ | async" *ngFor="let node of nodes;"> 
+                    </g> 
+                </g>
+            </g>
+        </svg> 
+    </div>
+    <div class="graph-sidebar-section" [style.height.px]="options.height">
+        <nw-sidebar [nodes]="nodes"></nw-sidebar>
+    </div>
+    <!-- <div class="graph-legend">
+        <node-legend></node-legend>
+    </div> -->
+    <div class="graph-hz-tools-section">
+        <div style="margin-left: 2px; margin-right: 20px;">
+            Enable Labels
+        </div>
+        <div>
+            <mat-slide-toggle style="cursor: pointer" (change)="toggleLabel()" [checked]="hideLabel$ | async">
+            </mat-slide-toggle>
+        </div>
+        <div class="graph-tools-item">
+            <network-fadein-notify [notifications]="fadeinNotificationService.notifications"></network-fadein-notify>
+        </div>
+    </div> 
+    <div class="graph-tools-section"> 
+        <div class="graph-tools-item-redraw"> 
+            <button mat-mini-fab color="primary" aria-label="Refresh" style="display: flex; align-items: center; justify-content: center; height:28px;width:28px" (click)="resetNodePositions()">
+                <mat-icon matTooltip="Reposition" matTooltipPosition="left" style="font-size: 20px; vertical-align: middle; margin-top: 3px;">
+                    replay
+                </mat-icon> 
+            </button> 
+        </div> 
+    </div> 
+    <div class="graph-loader-section" *ngIf="dataLoading">
+        <mat-spinner></mat-spinner> 
+    </div> 
+    <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="latestFocusedNodeRef"
+            [cdkConnectedOverlayOpen]="isContextMenuOpen" 
+            [cdkConnectedOverlayOffsetX]="0" 
+            [cdkConnectedOverlayOffsetY]="0"> 
+            <ul class="menu" [cdkTrapFocus]="isContextMenuOpen" [cdkTrapFocusAutoCapture]="isContextMenuOpen" (focusout)="isContextMenuOpen=false" (mousewheel)="isContextMenuOpen=false"> 
+                <li *ngFor="let option of contextMenuOptions" class="menu-item"> 
+                    <button type="button" class="menu-btn" (click)="contextMenuClick(option.id, latestFocusedNode!); isContextMenuOpen = false;">
+                        <span class="menu-text">{{option.label}}</span> 
+                    </button> 
+                </li> 
+            </ul> 
+    </ng-template>
+</div>

@@ -83,3 +83,6 @@ common/autoinstallers/*/.npmrc
 
 # Heft
 .heft
+
+#Angular
+.angular

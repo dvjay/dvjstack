@@ -1,0 +1,32 @@
+.nw-node {
+    outline: none;
+}
+
+.select-node-circle {
+    cursor: pointer;
+    /* stroke-width: 4; */
+    fill: red;
+}
+
+.highlight-node-circle {
+    cursor: pointer;
+    /* stroke-width: 4; */
+    fill: #FFE800;
+}
+
+.node-circle {
+    cursor: pointer;
+    /* stroke-width: 4; */
+}
+
+.node-name {
+    font-family: 'Lato';
+    text-anchor: middle;
+    alignment-baseline: central;
+    font-weight: 300;
+    fill: white;
+}
+
+.node-label {
+    font-size: 11px;
+}

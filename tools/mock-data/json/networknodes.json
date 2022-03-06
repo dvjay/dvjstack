@@ -1,0 +1,298 @@
+{
+  "networknodes": {
+    "status": "success",
+    "timestamp": "2021-05-23",
+    "data": [
+      {
+        "printSet": [
+          {
+            "v_id": "90098302633",
+            "v_type": "gfctEntity",
+            "attributes": {
+              "entityid": "90098302633",
+              "entitylabel": "SURESH KUMAR SADASIVAN NAIR",
+              "src": "CP",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "302190803",
+            "v_type": "gfctParty",
+            "attributes": {
+              "amlptyId": "302190803",
+              "partyfullname": "SURESH KUMAR SADASIVAN NAIR",
+              "ptyid": "10000637301",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "140 ETHEL RD W STE S 08854, PISCATAWAY, NJ, US",
+            "v_type": "gfctAddress",
+            "attributes": {
+              "partyaddress": "140 ETHEL RD W STE S 08854, PISCATAWAY, NJ, US",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "150347655",
+            "v_type": "gfctSSN",
+            "attributes": {
+              "ssn": "150347655",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "302190804",
+            "v_type": "gfctParty",
+            "attributes": {
+              "amlptyId": "302190804",
+              "partyfullname": "SURESH SADASIVAN NAIR",
+              "ptyid": "10000637302",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "302190805",
+            "v_type": "gfctParty",
+            "attributes": {
+              "amlptyId": "302190805",
+              "partyfullname": "Manish Singhal",
+              "ptyid": "10000637303",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "9137353861",
+            "v_type": "gfctAccount",
+            "attributes": {
+              "amlaccid": "9137353861",
+              "accno": "4147342071409744",
+              "accnm": "SURESH KUMAR SADASIVAN NAIR",
+              "accopendate": "2019-02-19",
+              "accptyrolecd": "BOR",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "9063500632",
+            "v_type": "gfctAccount",
+            "attributes": {
+              "amlaccid": "9063500632",
+              "accno": "4147342080775721",
+              "accnm": "SURESH KUMAR SADASIVAN NAIR",
+              "accopendate": "2019-02-19",
+              "accptyrolecd": "BOR",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "7326402365",
+            "v_type": "gfctPhone",
+            "attributes": {
+              "phonenumber": "7326402365",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "5016402366",
+            "v_type": "gfctPhone",
+            "attributes": {
+              "phonenumber": "5016402366",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "ap@globallines.com",
+            "v_type": "gfctEmail",
+            "attributes": {
+              "emailaddress": "ap@globallines.com",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "9137353862",
+            "v_type": "gfctAccount",
+            "attributes": {
+              "amlaccid": "9137353862",
+              "accno": "4147342071409745",
+              "accnm": "SURESH SADASIVAN NAIR",
+              "accopendate": "2019-09-09",
+              "accptyrolecd": "BOR",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          },
+          {
+            "v_id": "9063500633",
+            "v_type": "gfctAccount",
+            "attributes": {
+              "amlaccid": "9063500633",
+              "accno": "4147342080775722",
+              "accnm": "SURESH SADASIVAN NAIR",
+              "accopendate": "2019-05-29",
+              "accptyrolecd": "BOR",
+              "flucd": "CNS_RTL_BNK",
+              "fludescription": "Consumer Retail Banking",
+              "isskewed": "false",
+              "@visited": true
+            }
+          }
+        ]
+      },
+      {
+        "@@edgeSet": [
+          {
+            "e_type": "contains",
+            "from_id": "90098302633",
+            "from_type": "gfctEntity",
+            "to_type": "gfctParty",
+            "to_id": "302190803",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "contains",
+            "from_id": "90098302633",
+            "from_type": "gfctEntity",
+            "to_type": "gfctParty",
+            "to_id": "302190804",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_acct",
+            "from_id": "302190803",
+            "from_type": "gfctParty",
+            "to_type": "gfctAccount",
+            "to_id": "9137353861",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_acct",
+            "from_id": "302190803",
+            "from_type": "gfctParty",
+            "to_type": "gfctAccount",
+            "to_id": "9063500632",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_address",
+            "from_id": "302190803",
+            "from_type": "gfctParty",
+            "to_type": "gfctAddress",
+            "to_id": "140 ETHEL RD W STE S 08854, PISCATAWAY, NJ, US",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_ssn",
+            "from_id": "302190803",
+            "from_type": "gfctParty",
+            "to_type": "gfctSSN",
+            "to_id": "150347655",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_ssn",
+            "from_id": "302190804",
+            "from_type": "gfctParty",
+            "to_type": "gfctSSN",
+            "to_id": "150347655",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_phone",
+            "from_id": "302190803",
+            "from_type": "gfctParty",
+            "to_type": "gfctPhone",
+            "to_id": "7326402365",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_phone",
+            "from_id": "302190804",
+            "from_type": "gfctParty",
+            "to_type": "gfctPhone",
+            "to_id": "5016402366",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_email",
+            "from_id": "302190803",
+            "from_type": "gfctParty",
+            "to_type": "gfctEmail",
+            "to_id": "ap@globallines.com",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_acct",
+            "from_id": "302190804",
+            "from_type": "gfctParty",
+            "to_type": "gfctAccount",
+            "to_id": "9137353862",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_acct",
+            "from_id": "302190804",
+            "from_type": "gfctParty",
+            "to_type": "gfctAccount",
+            "to_id": "9063500633",
+            "directed": false,
+            "attributes": {}
+          },
+          {
+            "e_type": "has_acct",
+            "from_id": "302190805",
+            "from_type": "gfctParty",
+            "to_type": "gfctAccount",
+            "to_id": "9063500633",
+            "directed": false,
+            "attributes": {}
+          }
+        ]
+      }
+    ]
+  }
+}

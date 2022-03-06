@@ -1,0 +1,11 @@
+.link {
+    stroke-width: 2;
+    stroke: #595959;
+    marker-end: 'url(#arrow)'
+}
+
+.link-label {
+    font-size: 11px;
+    pointer-events: none;
+    margin: 2px;
+}

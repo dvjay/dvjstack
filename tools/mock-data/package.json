@@ -1,0 +1,15 @@
+{
+    "name": "mock-data",
+    "version": "1.0.0",
+    "description": "Json server for mock services",
+    "scripts": {
+        "generate": "node src/generate-mock-data",
+        "start": "json-server --watch scripts/db.js --delay 1000 --routes routes.json --middlewares scripts/middleware.js --port 3001"
+    },
+    "devDependencies": {
+        "faker": "^6.6.6",
+        "json-schema-faker": "^0.5.0-rcv.36",
+        "json-server": "^0.17.0",
+        "moment": "^2.29.1"
+    }
+}

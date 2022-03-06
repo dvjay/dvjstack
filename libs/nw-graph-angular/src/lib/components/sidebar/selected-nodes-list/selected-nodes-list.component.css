@@ -1,0 +1,75 @@
+.nw-sel-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: stretch;
+    align-items: stretch;
+    font-family: 'Roboto', sans-serif;
+    color: #444;
+    border: 1px solid #999;
+    border-radius: 4px;
+    background-color: #fefeff;
+    border-top: 4px solid #999;
+    padding: 0 5px 10px 5px;
+    margin: 0 5px 5px 5px;
+}
+
+.nw-sel-node-img {
+    display: flex;
+    width: 25px;
+    height: 25px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border-color: #000000;
+    border-style: solid;
+    border-width: 3px;
+    flex: 0 1 auto;
+    align-self: center;
+}
+.nw-sel-node-label {
+    flex: 0 1 auto;
+    align-self: center;
+    padding: 3px 0 3px 0;
+    color: black;
+    font-size: 16px;
+}
+.nw-sel-node-avatar {
+    height: 20px;
+    width: 20px;
+}
+
+.nw-sel-label {
+    flex: 0 1 auto;
+    align-self: stretch;
+    padding: 3px 0 3px 0;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+}
+
+.nw-sel-divider {
+    flex: 0 1 auto;
+    align-self: stretch;
+    border: 1px solid #999;
+}
+
+.nw-sel-attr-container {
+    flex: 0 1 auto;
+    align-self: stretch;
+    margin-top: 10px;
+}
+
+.nw-sel-attr-container-title {
+    font-size: 15px;
+    color: black;
+}
+
+.empty-sel_section {
+    margin-top: 100px;
+    text-align: center;
+}

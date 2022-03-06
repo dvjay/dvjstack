@@ -1,0 +1,50 @@
+<svg:g #noderef class="nw-node" 
+        [attr.transform]="'translate(' + node!.x + ',' + node!.y + ')'" 
+        [draggableNode]="node!" 
+        [draggableInGraph]="graph!" 
+        [tooltip]="node" 
+        [ngStyle]="{'opacity': nodeOpacity}" 
+        (click)="$event.stopPropagation()"
+        (mouseover)="handleMouseOver()"
+        (mouseout)="handleMouseOut()"> 
+    <svg:g>
+        <svg:circle *ngIf="highlightedNodeIds!.indexOf(node!.nodeId) !== -1" 
+                class="highlight-node-circle"
+                [attr.stroke-width]="nodeBorderWidth"
+                cx="0" 
+                cy="0" 
+                [attr.r]="selectedNodeIds!.indexOf(node!.nodeId) === -1 ? nodRadius! + (nodeBorderWidth * 3/2) : nodRadius! + (nodeBorderWidth * 5/2)">
+        </svg:circle>
+        <svg:circle *ngIf="selectedNodeIds!.indexOf(node!.nodeId) !== -1" 
+                class="select-node-circle"
+                [attr.stroke-width]="nodeBorderWidth"
+                cx="0" 
+                cy="0" 
+                [attr.r]="nodRadius! + (nodeBorderWidth * 3/2)">
+        </svg:circle> 
+        <svg:circle [ngStyle]="nodeStyle" 
+                    class="node-circle" 
+                    [attr.fill]="node!.color"
+                    [attr.stroke-width]="nodeBorderWidth"
+                    cx="0" 
+                    cy="0" 
+                    [attr.r]="nodRadius!">
+        </svg:circle> 
+        <svg:image [attr.href]="node!.imagePath" 
+                    height="30" 
+                    width="30" 
+                    transform="translate(-15, -15)"/>
+        <title></title>
+        <svg:g [attr.transform]="naid.transform" *ngFor="let naid of nodeAlertIconsDetails">
+                <svg:svg [attr.height]="naid.height" [attr.width]="naid.width" [attr.x]="naid.x" [attr.y]="naid.y" viewBox="0 0 349.99 349.99" xml:space="preserve">
+                        <svg:g style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(-1.9443888888888807 -1.9443888888888807) scale(3.89 3.89)" >
+                                <svg:circle cx="45.001999999999995" cy="45.001999999999995" r="42.702" [attr.fill]="naid.color" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill-rule: nonzero; opacity: 1;" transform="matrix(1 0 0 1 0 0)"/>
+                                <path d="M 45 57.469 L 45 57.469 c -1.821 0 -3.319 -1.434 -3.399 -3.252 L 38.465 23.95 c -0.285 -3.802 2.722 -7.044 6.535 -7.044 h 0 c 3.813 0 6.82 3.242 6.535 7.044 l -3.137 30.267 C 48.319 56.036 46.821 57.469 45 57.469 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(56,56,56); fill-rule: nonzero; opacity: 1;" transform="matrix(1 0 0 1 0 0)" stroke-linecap="round" />
+                                <circle cx="45" cy="67.67" r="5.42" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(56,56,56); fill-rule: nonzero; opacity: 1;" transform="  matrix(1 0 0 1 0 0) "/>
+                                <path d="M 45 90 C 20.187 90 0 69.813 0 45 C 0 20.187 20.187 0 45 0 c 24.813 0 45 20.187 45 45 C 90 69.813 69.813 90 45 90 z M 45 6 C 23.495 6 6 23.495 6 45 s 17.495 39 39 39 s 39 -17.495 39 -39 S 66.505 6 45 6 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(56,56,56); fill-rule: nonzero; opacity: 1;" transform="matrix(1 0 0 1 0 0)" stroke-linecap="round" />
+                        </svg:g>
+                </svg:svg>
+                <title>{{naid.text}}</title>
+        </svg:g>
+    </svg:g> 
+</svg:g>

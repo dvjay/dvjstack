@@ -1,0 +1,23 @@
+<ng-container *ngIf="selectedNodes?.length > 0">
+    <div class="nw-sel-container" *ngFor="let selectedNode of selectedNodes">
+        <div class="nw-sel-label">
+            <div class="nw-sel-node-img">
+                <img class="nw-sel-node-avatar" src="{{selectedNode.imagePath}}" alt="Node Type">
+            </div>
+            <div class="nw-sel-node-label">
+                {{selectedNode.label}}
+            </div>
+        </div>
+        <div class="nw-sel-divider"></div>
+        <div class="nw-sel-attr-container" *ngFor="let attrObj of selectedNode.nodeDescAttributes">
+            <div class="nw-sel-attr-container-title">{{attrObj.title + ':'}}</div>
+            <div>
+                {{selectedNode.nodeRawObject && selectedNode.nodeRawObject[attrObj.attribute]? selectedNode.nodeRawObject[attrObj.attribute] : "-"}}
+            </div>
+        </div>
+    </div>
+</ng-container>
+<ng-container *ngIf="selectedNodes?.length === 0">
+    <div class="empty-sel_section">No Selected Node!</div>
+</ng-container>
+    

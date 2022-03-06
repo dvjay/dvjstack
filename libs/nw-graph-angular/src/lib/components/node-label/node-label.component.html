@@ -1,0 +1,18 @@
+<svg:g class="nw-node-label"
+        [attr.transform]="'translate(' + node!.x + ',' + node!.y + ')'"
+        [ngStyle]="{'opacity': nodeOpacity}"
+        style="pointer-events: none;">
+    <svg:text *ngIf="hideLabel" 
+                filter="url(#bg-text)" 
+                [attr.x]="labelPosition.x" 
+                [attr.y]="labelPosition.y"
+                class="node-label-label">
+        {{node!.label}}
+    </svg:text>
+    <svg:text *ngIf="hideLabel"
+                [attr.x]="labelPosition.x"
+                [attr.y]="labelPosition.y"
+                class="node-label-label">
+        {{node!.label}}
+    </svg:text>
+</svg:g>

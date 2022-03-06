@@ -461,6 +461,13 @@
       "packageName": "dvj-rig",
       "projectFolder": "tools/dvj-rig",
       "cyclicDependencyProjects": ["nw-graph-angular"],
+      "reviewCategory": "tools",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "mock-data",
+      "projectFolder": "tools/mock-data",
+      "reviewCategory": "tools",
       "shouldPublish": false
     },
     {

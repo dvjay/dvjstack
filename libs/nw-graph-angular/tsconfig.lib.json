@@ -3,10 +3,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/lib",
+    "declarationMap": true,
     "target": "es2015",
     "declaration": true,
-    "declarationMap": true,
     "inlineSources": true,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false,
     "types": [],
     "lib": [
       "dom",
@@ -20,6 +22,7 @@
   },
   "exclude": [
     "src/test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "**/*.stories.*"
   ]
 }

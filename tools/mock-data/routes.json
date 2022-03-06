@@ -1,0 +1,5 @@
+{
+    "/get_application_config?*": "/nwconfig",
+    "/get_network_nodes/0": "/networknodes",
+    "/get_network_nodes/1": "/networknodes"
+}

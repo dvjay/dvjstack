@@ -1,0 +1,20 @@
+<svg:line [ngStyle]="{'opacity': linkOpacity}" 
+            class="link" 
+            [attr.x1]="sourcePoint.x" 
+            [attr.y1]="sourcePoint.y" 
+            [attr.x2]="targetPoint.x" 
+            [attr.y2]="targetPoint.y" 
+            stroke="#000" 
+            stroke-width="8"
+            marker-end="url(#arrowhead)"> 
+</svg:line> 
+<svg:text *ngIf="hideLabel" 
+            class="link-label"
+            [ngStyle] ="{'opacity': linkOpacity}" 
+            [attr.x]="centerPoint.x" 
+            [attr.y]="centerPoint.y" 
+            [attr.transform]="labelRotation" 
+            text-anchor="middle" 
+            dominant-baseline="text-after-edge">
+        {{link.name}} 
+</svg:text>

@@ -1,0 +1,141 @@
+<div class="sb-flex-col sb-sidebar-container"> 
+    <div class="sb-flex-col"> 
+        <div class="sb-flex-row"> 
+            <input type="checkbox" id="expand-toggle"/>
+            <label for="expand-toggle" id="gdd-nw-mat-icon-back" class="left-side-arrow">
+                <mat-icon>arrow_back</mat-icon>
+            </label> 
+            <label for="expand-toggle" id="gdd-nw-mat-icon-forward" class="left-side-arrow">
+                <mat-icon>arrow_forward</mat-icon>
+            </label>
+            <div class="left-side-section">  
+                <div class="left-side-item left-side-item-selected" 
+                    (mouseover)="filterHover=true" 
+                    (mouseleave)="filterHover=false" 
+                    [ngStyle]="{borderLeftColor: selectedTool == 'filter' ? '#FFFFFF' : '#7D7D7D',
+                                color: selectedTool=='filter' ? '#FFFFFF' : (filterHover == true? '#FFFFFF' : '#CACACA')}" 
+                    (click)="selectTool('filter')">
+                    <mat-icon matTooltip="Filter" matTooltipPosition="right">filter_alt</mat-icon> 
+                </div> 
+                <div class="left-side-item left-side-item-selected"
+                    (mouseover)="alertsHover=true" 
+                    (mouseleave)="alertsHover=false" 
+                    [ngStyle]="{borderLeftColor: selectedTool == 'alerts' ? '#FFFFFF' : '#70707D', 
+                                color: selectedTool=='alerts' ? '#FFFFFF' : (alertsHover==true? '#FFFFFF' : '#CACACA')}" 
+                    (click)="selectTool('alerts')">
+                    <mat-icon matTooltip="Alerts" matTooltipPosition="right">notifications</mat-icon> 
+                </div> 
+                <div class="left-side-item left-side-item-selected"
+                    (mouseover)="logsHover=true" 
+                    (mouseleave)="logsHover=false" 
+                    [ngStyle]="{borderLeftColor: selectedTool == 'logs' ? '#FFFFFF' : '#70707D', 
+                                color: selectedTool=='logs' ? '#FFFFFF' : (logsHover==true? '#FFFFFF' : '#CACACA')}" 
+                    (click)="selectTool('logs')">
+                    <mat-icon matTooltip="Logs" matTooltipPosition="right">app_registration</mat-icon> 
+                </div> 
+                <div class="left-side-item left-side-item-selected"
+                    (mouseover)="settingsHover=true" 
+                    (mouseleave)="settingsHover=false" 
+                    [ngStyle]="{borderLeftColor: selectedTool == 'settings' ? '#FFFFFF' : '#70707D', 
+                                color: selectedTool=='settings' ? '#FFFFFF' : (settingsHover==true? '#FFFFFF' : '#CACACA')}" 
+                    (click)="selectTool('settings')">
+                    <mat-icon matTooltip="Settings" matTooltipPosition="right">settings</mat-icon> 
+                </div> 
+                <div class="left-side-item left-side-item-selected"
+                    (mouseover)="selectedNodesHover=true" 
+                    (mouseleave)="selectedNodesHover=false" 
+                    [ngStyle]="{borderLeftColor: selectedTool == 'selectednodes' ? '#FFFFFF' : '#70707D', 
+                                color: selectedTool=='selectednodes' ? '#FFFFFF' : (selectedNodesHover==true? '#FFFFFF' : '#CACACA')}" 
+                    (click)="selectTool('selectednodes')">
+                    <mat-icon matTooltip="Selected Nodes" matTooltipPosition="right">view_array</mat-icon> 
+                </div> 
+            </div> 
+            <div class="nw-rightside nw-rightside-section" [ngSwitch]="selectedTool">
+                <!-- Filter -->
+                <div *ngSwitchCase="'filter'">
+                    <div class="right-side-heading">Filter</div>
+                    <div class="right-side-content"> 
+                        <div class="sidebar-rightside-container"> 
+                            <!-- <div class="sidebar-rightside-heading">
+                                Filter
+                            </div>  -->
+                            <div class="sidebar-rightside-content">
+                                <sidebar-filter>Filter</sidebar-filter> 
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+                <!-- Alerts List -->
+                <div *ngSwitchCase="'alerts'">
+                    <div class="right-side-heading">Alerts</div>
+                    <div class="right-side-content"> 
+                        <div class="sidebar-rightside-container"> 
+                            <!-- <div class="sidebar-rightside-heading">
+                                Alerts
+                            </div>  -->
+                            <div class="sidebar-rightside-content">
+                                <div></div>
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+                <!-- Logs List -->
+                <div *ngSwitchCase="'logs'">
+                    <div class="right-side-heading">Logs</div>
+                    <div class="right-side-content"> 
+                        <div class="sidebar-rightside-container"> 
+                            <!-- <div class="sidebar-rightside-heading">
+                                Logs
+                            </div>  -->
+                            <div class="sidebar-rightside-content">
+                                <div></div>
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+                <!-- Settings -->
+                <div *ngSwitchCase="'settings'">
+                    <div class="right-side-heading">Settings</div>
+                    <div class="right-side-content"> 
+                        <div class="sidebar-rightside-container"> 
+                            <!-- <div class="sidebar-rightside-heading">
+                                Settings
+                            </div>  -->
+                            <div class="sidebar-rightside-content">
+                                <param-list></param-list>
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+                <!-- Selected Nodes -->
+                <div *ngSwitchCase="'selectednodes'">
+                    <div class="right-side-heading">Selected Nodes</div>
+                    <div class="right-side-content"> 
+                        <div class="sidebar-rightside-container"> 
+                            <!-- <div class="sidebar-rightside-heading">
+                                Selected Nodes
+                            </div>  -->
+                            <div class="sidebar-rightside-content">
+                                <selected-nodes-list></selected-nodes-list>
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+                <!-- Default -->
+                <div *ngSwitchDefault>
+                    <div class="right-side-heading">Default</div>
+                    <div class="right-side-content"> 
+                        <div class="sidebar-rightside-container"> 
+                            <!-- <div class="sidebar-rightside-heading">
+                                Default
+                            </div>  -->
+                            <div class="sidebar-rightside-content">
+                                <div></div>
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

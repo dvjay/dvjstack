@@ -8,19 +8,24 @@
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "lib": [
-        "dist/lib/lib",
-        "dist/lib"
-      ]
-    },
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
+    "paths": {
+      "nw-graph-angular": [
+        "dist/nw-graph-angular/nw-graph-angular",
+        "dist/nw-graph-angular",
+        "libs/nw-graph-angular/src/public-api"
+      ],
+      "lib": [
+        "dist/lib/lib",
+        "dist/lib"
+      ]
+    },
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es2017",
     "module": "es2020",
     "lib": [
       "es2018",
@@ -31,6 +36,7 @@
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    "fullTemplateTypeCheck": true
   }
 }

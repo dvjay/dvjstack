@@ -1,0 +1,7 @@
+<div class='list-container'>
+    <div class='list-item' 
+        *ngFor='let note of notifications' 
+        [@simpleFadeAnimation]="'in'">
+        {{note.message}}
+    </div>
+</div>

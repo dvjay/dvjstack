@@ -1,0 +1,156 @@
+.graph-section-container { 
+    /* margin: auto; */ 
+    position: relative; 
+    width: 100%; 
+    box-sizing: border-box; 
+    overflow: hidden;
+    /* background-color: #E1F2F7; */
+    display: grid; 
+    grid-template-columns: auto auto auto; 
+    grid-template-rows: auto auto auto; 
+    border: solid 1px #555; 
+    box-shadow:0 0 10px rgba(0, 0, 0, 0.6); 
+    box-sizing: content-box;
+    overflow: hidden;
+}
+.graph-svg-section { 
+    position: relative; 
+    width: 100%; 
+    box-sizing: border-box; 
+    overflow: hidden;
+    grid-column: 1/4;
+    grid-row: 1 / 4;
+}
+.graph-sidebar-section {
+    z-index: 2;
+    grid-column: 1 / 2; 
+    grid-row: 1 / 4;
+}
+
+.graph-loader-section {
+    grid-column: 1 / 4; 
+    grid-row: 1 / 4; 
+    background-color: rgba(255,255,255,0.7); 
+    z-index: 1000; 
+    display: flex; 
+    align-content: center; 
+    align-items: center; 
+    justify-content: center;
+}
+.graph-tools-item { 
+    margin-right: 20px;
+}
+
+.graph-tools-section {
+    grid-column: 3 / 4; 
+    grid-row: 1 / 4; 
+    display: flex; 
+    flex-direction: column; 
+    flex-wrap: nowrap; 
+    justify-content: flex-start; 
+    align-content: space-around; 
+    align-items: flex-end;
+}
+
+.graph-hz-tools-section { 
+    grid-column: 1 / 4; 
+    grid-row: 1 / 2; 
+    display: flex; 
+    flex-direction: row-reverse; 
+    flex-wrap: nowrap; 
+    justify-content: flex-start; 
+    align-content: space-around; 
+    align-items: center; 
+    padding-right: 40px; 
+    font-size: 14px;
+} 
+
+.graph-tools-item-redraw { 
+    order: 4; 
+    flex: 0 1 auto; 
+    align-self: auto; 
+    display: flex; 
+    justify-content: center; 
+    margin: 3px;
+}
+.graph-legend {
+    grid-column: 3 / 4; 
+    grid-row: 3 / 4; 
+    display: flex; 
+    flex-direction: column; 
+    flex-wrap: nowrap; 
+    justify-content: flex-start; 
+    align-content: space-around; 
+    align-items: flex-start; 
+    margin: 3px 3px 0;
+}
+/* context menu begin */ 
+.menu {
+    position: absolute; 
+    width: 70px; 
+    padding: 2px; 
+    margin: 0; 
+    border: 1px solid #bbb; 
+    background: #eee; 
+    background: linear-gradient(to bottom, #fff 0%, #e5e5e5 100px, #e5e5e5 100%); 
+    z-index: 100; 
+    border-radius: 1px; 
+    box-shadow: 1px 1px 4px rgba(0,0,0,.2); 
+    transform: translate(0, 15px) scale (.95); 
+    transition: transform 0.1s ease-out, opacity 0.1s ease-out; 
+    opacity: 1; 
+    transform: translate (0, 0) scale (1); 
+    transition-delay: 300ms;
+}
+
+.menu-item {
+    display: block;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.menu-btn {
+    display: block; 
+    color: #444; 
+    font-family: 'Roboto', sans-serif; 
+    font-size: 13px; 
+    cursor: pointer; 
+    border: 1px solid transparent; 
+    white-space: nowrap; 
+    padding: 6px 8px; 
+    border-radius: 3px;
+}
+.menu-btn:focus {
+    outline: Opx solid transparent;
+}
+button.menu-btn {
+    background: none; 
+    line-height: normal; 
+    overflow: visible; 
+    width: 100%; 
+    text-align: left;
+}
+.menu-text { 
+    margin-left: 0;
+}
+
+.menu-item:hover > .menu-btn {
+    color: #fff; 
+    outline: none; 
+    background-color: #2E3940; 
+    background: linear-gradient(to bottom, #5D6D79, #2E3940);
+    border: 1px solid #2E3940;
+}
+
+.menu-item-disabled {
+    opacity: .5; 
+    pointer-events: none;
+}
+
+.menu-item-disabled .menu-btn {
+    cursor: default;
+}
+    
+/* context menu end */
