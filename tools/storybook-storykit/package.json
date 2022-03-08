@@ -1,0 +1,28 @@
+{
+    "name": "storybook-storykit",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Storybook build dependencies for Angular app",
+    "main": "dist/index.cjs",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+      "build": ""
+    },
+    "devDependencies": {
+      "@babel/core": "^7.17.5",
+      "@compodoc/compodoc": "^1.1.19",
+      "@storybook/addon-actions": "^6.4.19",
+      "@storybook/addon-essentials": "^6.4.19",
+      "@storybook/addon-interactions": "^6.4.19",
+      "@storybook/addon-links": "^6.4.19",
+      "@storybook/angular": "^6.4.19",
+      "@storybook/builder-webpack5": "^6.4.19",
+      "@storybook/manager-webpack5": "^6.4.19",
+      "@storybook/node-logger": "^6.4.19",
+      "@storybook/testing-library": "0.0.9",
+      "@types/node": "^12.11.1",
+      "babel-loader": "^8.2.3"
+    }
+  }
+  

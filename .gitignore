@@ -74,6 +74,7 @@ typings/
 # OS X temporary files
 .DS_Store
 dist
+!tools/storybook-storykit/dist
 
 # Rush temporary files
 common/deploy/
