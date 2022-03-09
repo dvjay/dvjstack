@@ -54,10 +54,12 @@ export function treeConstrainsts(d3Cola: any, rootNodeIndex: number, nodes: any[
     tree(root);
     const descendants = root.descendants();
     for (const d of descendants) {
-        nodes[d.data.orignalIndex].x = (d as any).x;
-        nodes[d.data.orignalIndex].y = (d as any).y;
-        nodes[d.data.orignalIndex].fx = (d as any).x;
-        nodes[d.data.orignalIndex].fy = (d as any).y;
+        if(d && d.data && d.data.orignalIndex) {
+            nodes[d.data.orignalIndex].x = (d as any).x;
+            nodes[d.data.orignalIndex].y = (d as any).y;
+            nodes[d.data.orignalIndex].fx = (d as any).x;
+            nodes[d.data.orignalIndex].fy = (d as any).y;
+        }
     }
     const simulation = forceSimulation(nodes)
                             .force("charge", forceManyBody().distanceMax(options.height/2).strength(-2000))

@@ -2,6 +2,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": false,
     "outDir": "../out-tsc/lib",
     "declarationMap": true,
     "target": "es2015",
@@ -20,8 +21,10 @@
     "strictMetadataEmit": true,
     "enableResourceInlining": true
   },
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
-    "src/test.ts",
     "**/*.spec.ts",
     "**/*.stories.*"
   ]

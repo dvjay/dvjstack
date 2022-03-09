@@ -12,7 +12,7 @@
     "declarationMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     "noUnusedLocals": true,
     "types": ["heft-jest", "node"],
 

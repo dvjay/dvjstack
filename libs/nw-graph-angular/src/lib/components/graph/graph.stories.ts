@@ -3,8 +3,8 @@ import {
     Story,
     Meta,
     componentWrapperDecorator,
-} from '@storybook/angular';
-import { action } from '@storybook/addon-actions';
+} from 'storybook-storykit';
+import { action } from 'storybook-storykit';
 
 import { CommonModule } from '@angular/common';
 import { GraphComponent } from './graph.component';

@@ -43,6 +43,13 @@
        * An optional object that provides additional settings that may be defined by the plugin.
        */
       // "options": { }
+    },
+    {
+      "plugin": "@rushstack/heft-storybook-plugin",
+      "options": {
+        "storykitPackageName": "storybook-storykit",
+        "startupModulePath": "@storybook/angular/bin/index.js"
+      }
     }
   ]
 }

@@ -100,8 +100,9 @@ export function graphReducer(state = initialState, action: Action): State {
                 maxNodeCountExceeded = payloadData.nodes.size > maxNodeCount;
             }
             // Check if rootNodeId exist in incoming data
-            if(payloadData.nodes.has(rootNodeId)) {
-                payloadData.nodes.get(rootNodeId).isRootNode = true;
+            const cRootNode = payloadData.nodes.get(rootNodeId);
+            if(cRootNode) {
+                cRootNode.isRootNode = true;
             } else {
                 console.info("Root Node is absent.")
                 return state;

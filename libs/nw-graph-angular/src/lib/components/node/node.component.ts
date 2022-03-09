@@ -93,7 +93,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
             Array.isArray(this.configParserService.nwConfig.alert.nodeAttributes)) {
             // console.log("this.configParserService.nwConfig", this.configParserService);
             for (const nodeAttribute of this.configParserService.nwConfig.alert.nodeAttributes) {
-                if(nodeAttribute.nodeType === this.node.nodeType && this.checkCondition(this.node[nodeAttribute.attribute], nodeAttribute.condition)) {
+                if(this.node && nodeAttribute.nodeType === this.node.nodeType && this.checkCondition(this.node[nodeAttribute.attribute], nodeAttribute.condition)) {
                     const pos = this.configParserService.nwNodeAlertSlots.get(nodeAttribute.position);
                     if(pos) {
                         this.nodeAlertIconsDetails.push({height: pos.height, 
