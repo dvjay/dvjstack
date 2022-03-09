@@ -4,7 +4,6 @@ import {
     Meta,
     componentWrapperDecorator,
 } from 'storybook-storykit';
-import { action } from 'storybook-storykit';
 
 import { CommonModule } from '@angular/common';
 import { GraphComponent } from './graph.component';
