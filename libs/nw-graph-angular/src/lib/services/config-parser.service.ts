@@ -79,22 +79,32 @@ export class ConfigParserService {
         if(isArrayOfNonEmptyStrings(nodeRawConfig.parentRawPath)) {
             this.nwConfig.node.parentRawPath = nodeRawConfig.parentRawPath;
         } else {
-            console.info(`${ERROR_STR}Invalid parentRawPath for Nodes`);
+            console.error(`${ERROR_STR}Invalid parentRawPath for Nodes`);
         }
         if(nodeRawConfig && typeof nodeRawConfig.nodeIdAttributeKey === 'string' && nodeRawConfig.nodeIdAttributeKey.length > 0) {
             this.nwConfig.node.nodeIdAttributeKey = nodeRawConfig.nodeIdAttributeKey;
         } else {
-            console.info(`${ERROR_STR}Invalid nodeIdAttributeKey for Nodes`);
+            console.error(`${ERROR_STR}Invalid nodeIdAttributeKey for Nodes`);
         }
         if(nodeRawConfig && typeof nodeRawConfig.nodeTypeAttributeKey === 'string' && nodeRawConfig.nodeTypeAttributeKey.length > 0) {
             this.nwConfig.node.nodeTypeAttributeKey = nodeRawConfig.nodeTypeAttributeKey;
         } else {
-            console.info(`${ERROR_STR}Invalid nodeTypeAttributeKey for Nodes`);
+            console.error(`${ERROR_STR}Invalid nodeTypeAttributeKey for Nodes`);
         }
         if(nodeRawConfig && typeof nodeRawConfig.nodeTitleAttributeKey === 'string' && nodeRawConfig.nodeTitleAttributeKey.length > 0) {
             this.nwConfig.node.nodeTitleAttributeKey = nodeRawConfig.nodeTitleAttributeKey;
         } else {
-            console.info(`${ERROR_STR}Invalid nodeTitleAttributeKey for Nodes`);
+            console.error(`${ERROR_STR}Invalid nodeTitleAttributeKey for Nodes`);
+        }
+        if(nodeRawConfig && typeof nodeRawConfig.nodeNeighborsLoadedAttributeKey === 'string' && nodeRawConfig.nodeNeighborsLoadedAttributeKey.length > 0) {
+            this.nwConfig.node.nodeNeighborsLoadedAttributeKey = nodeRawConfig.nodeNeighborsLoadedAttributeKey;
+        } else {
+            console.error(`${ERROR_STR}Invalid nodeNeighborsLoadedAttributeKey for Nodes`);
+        }
+        if(nodeRawConfig && typeof nodeRawConfig.nodeCollapsedAttributeKey === 'string' && nodeRawConfig.nodeCollapsedAttributeKey.length > 0) {
+            this.nwConfig.node.nodeCollapsedAttributeKey = nodeRawConfig.nodeCollapsedAttributeKey;
+        } else {
+            console.error(`${ERROR_STR}Invalid nodeCollapsedAttributeKey for Nodes`);
         }
     }
     

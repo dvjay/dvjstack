@@ -1,5 +1,5 @@
 import { Component, Input, EventEmitter, Output, OnDestroy, SimpleChanges, OnChanges, ElementRef, ViewChild, AfterViewInit, OnInit } from '@angular/core'; 
-import { INode, NeighboursStateType, NodeAlertIconDetails } from '../../models/nw-data'; 
+import { INode, NeighboursStateType, NodeAlertIconDetails, NodeOutliningColors } from '../../models/nw-data'; 
 import { GraphEngineService } from '../../services/graph-engine.service'; 
 import { NotificationBrokerService } from '../../services/notification-broker.service'; 
 import { DispatchNodeLoadService } from '../../services/dispatch-node-load.service'; 
@@ -25,6 +25,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     @Input('selectedNodeIds') selectedNodeIds: string[] = [];
     @Input('highlightedNodeIds') highlightedNodeIds: string[] = [];
     @Output() expandNode = new EventEmitter();
+    @Output() fetchNeighborNodes = new EventEmitter();
     @Output() selectNode = new EventEmitter(); 
     @Output() selectOnlyClickedNode = new EventEmitter(); 
     // notificationMoveOverSub: Subscription; 
@@ -38,6 +39,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     nodeBorderWidth: number;
     nodeAlertIconsDetails: NodeAlertIconDetails[] = [];
     @ViewChild('noderef', { static: false }) el: ElementRef;
+    selectedNodeStyle = {  cursor: 'pointer', fill: NodeOutliningColors.NODE_SELECTED };
 
     constructor (private notificationBrokerService: NotificationBrokerService, 
                 private dispatchNodeLoadService: DispatchNodeLoadService, 
@@ -48,7 +50,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
         this.dispatchNodeLoad = dispatchNodeLoadService.dispatchNodeLoad$.subscribe(
             (nodeIds: string[]) => {
                 if(Array.isArray(nodeIds) && nodeIds.indexOf(this.node!.nodeId) > -1) {
-                    this.nodeStyle = { stroke: '#ff4d4d', strokeDasharray: 2 };
+                    this.setExpandedNodeLoadingStyle();
                 }
         });
         this.nodeRelationMouseOverSub = nodeRelationService.notificationMoveOver$.subscribe(
@@ -63,16 +65,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                             this.blurThisNode = true;
                         }
                     }
-                } // else if(message.edge) {
-                //     if(message.node === this.node) {
-
-                //     } else {
-
-                //     }
-                // } else {
-
-                // }
-        
+                }        
             });
         this.nodeRelationMouseOutSub = nodeRelationService.notificationMoveOut$.subscribe(
             (message: CurrentMouseOverNodeOrEdge) => {
@@ -91,23 +84,21 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
             this.configParserService.nwConfig && 
             this.configParserService.nwConfig.alert && 
             Array.isArray(this.configParserService.nwConfig.alert.nodeAttributes)) {
-            // console.log("this.configParserService.nwConfig", this.configParserService);
-            for (const nodeAttribute of this.configParserService.nwConfig.alert.nodeAttributes) {
-                if(this.node && nodeAttribute.nodeType === this.node.nodeType && this.checkCondition(this.node[nodeAttribute.attribute], nodeAttribute.condition)) {
-                    const pos = this.configParserService.nwNodeAlertSlots.get(nodeAttribute.position);
-                    if(pos) {
-                        this.nodeAlertIconsDetails.push({height: pos.height, 
-                                                        width: pos.width, 
-                                                        color: nodeAttribute.color, 
-                                                        text: nodeAttribute.message, 
-                                                        x: this.node.isRootNode? pos.x0 : pos.x,
-                                                        y: this.node.isRootNode? pos.y0 : pos.y,
-                                                        transform: `translate(-${pos.height/2}, -${pos.width/2})`})
+                for (const nodeAttribute of this.configParserService.nwConfig.alert.nodeAttributes) {
+                    if(this.node && nodeAttribute.nodeType === this.node.nodeType && this.checkCondition(this.node[nodeAttribute.attribute], nodeAttribute.condition)) {
+                        const pos = this.configParserService.nwNodeAlertSlots.get(nodeAttribute.position);
+                        if(pos) {
+                            this.nodeAlertIconsDetails.push({height: pos.height, 
+                                                            width: pos.width, 
+                                                            color: nodeAttribute.color, 
+                                                            text: nodeAttribute.message, 
+                                                            x: this.node.isRootNode? pos.x0 : pos.x,
+                                                            y: this.node.isRootNode? pos.y0 : pos.y,
+                                                            transform: `translate(-${pos.height/2}, -${pos.width/2})`})
+                        }
                     }
                 }
-            }
         }
-        // const alerts = this.configParserService.nwConfig.alert
     }
     ngAfterViewInit() {
         this.handleClickAndDoubleClick();
@@ -117,28 +108,35 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
         if (typeof changes['nodes'] !== "undefined" && typeof changes['nodes'].currentValue !== "undefined") {
             switch(this.node!.neighboursStatus) {
                 case NeighboursStateType.NOT_LOADED:
-                    this.nodeStyle = { stroke: 'gray' };
+                    if(this.node!.collapsed) { 
+                        this.nodeStyle = { stroke: NodeOutliningColors.NODE_COLLAPSED_AND_NEIGHBOURS_NOT_LOADED };
+                    } else {
+                        this.nodeStyle = { stroke: NodeOutliningColors.NODE_EXPANDED_AND_NEIGHBOURS_NOT_LOADED };
+                    }
                     break; 
-                case NeighboursStateType.LOADING: 
-                case NeighboursStateType.LOADING_THEN_EXPAND:
-                    this.nodeStyle = { stroke: '#ff4d4d', strokeDasharray: 2 };
+                case NeighboursStateType.LOADING:
+                    if(this.node!.collapsed) {
+                        this.setCollapsedNodeLoadingStyle();
+                    } else {
+                        this.setExpandedNodeLoadingStyle();
+                    }
                     break; 
                 case NeighboursStateType.LOADING_FAILED:
-                    this.nodeStyle = { stroke: '#eb0000' }; 
+                    this.nodeStyle = { stroke: NodeOutliningColors.NODE_LOADING_FAILED }; 
                     break; 
                 case NeighboursStateType.LOADED: 
                     if(this.node!.collapsed) { 
                         if(this.allNeighboursVisible()) {
-                            this.nodeStyle = { stroke: 'black' };
+                            this.nodeStyle = { stroke: NodeOutliningColors.NODE_EXPANDED_AND_NEIGHBOURS_LOADED };
                         } else {
-                            this.nodeStyle = { stroke: 'blue' };
+                            this.nodeStyle = { stroke: NodeOutliningColors.NODE_COLLAPSED_AND_NEIGHBOURS_LOADED };
                         }
                     } else {
-                        this.nodeStyle = { stroke: 'black' };
+                        this.nodeStyle = { stroke: NodeOutliningColors.NODE_EXPANDED_AND_NEIGHBOURS_LOADED };
                     }
                     break; 
                 default:
-                    this.nodeStyle = { stroke: 'gray' }; 
+                    this.nodeStyle = { stroke: NodeOutliningColors.NODE_EXPANDED_AND_NEIGHBOURS_NOT_LOADED };
                     break;
             }
         }
@@ -188,19 +186,13 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                     }
                 }
                 if(event.type === 'dblclick') {
-                    switch (this.node!.neighboursStatus) {
-                        case NeighboursStateType.NOT_LOADED: 
-                        case NeighboursStateType.LOADING_FAILED:
-                            this.nodeStyle = { stroke: '#ff4d4d', strokeDasharray: 2 };
-                            break; 
-                        case NeighboursStateType.LOADED: 
-                            if(this.node!.collapsed) {
-                                this.nodeStyle = { stroke: '#ff4d4d', strokeDasharray: 2 }; 
-                                this.expandNode.emit(this.node);
-                            }
-                            break;
-                        default:
-                            break;
+                    if(this.node!.collapsed) {
+                        this.expandNode.emit(this.node);
+                    }
+                    if(this.node!.neighboursStatus === NeighboursStateType.NOT_LOADED || this.node!.neighboursStatus === NeighboursStateType.LOADING_FAILED) {
+                        this.setExpandedNodeLoadingStyle();
+                        this.node!.neighboursStatus = NeighboursStateType.LOADING;
+                        this.fetchNeighborNodes.emit(this.node);
                     }
                 }
             }
@@ -225,5 +217,13 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     
     checkCondition(val: any, conditionStr: string){
         return Function('"use strict";let value="' + val +'";return ' + conditionStr)();
+    }
+
+    setExpandedNodeLoadingStyle() {
+        this.nodeStyle = { stroke: NodeOutliningColors.NODE_SELECTED, strokeDasharray: 2 };
+    }
+
+    setCollapsedNodeLoadingStyle() {
+        this.nodeStyle = { stroke: NodeOutliningColors.NODE_COLLAPSED_AND_NEIGHBOURS_NOT_LOADED, strokeDasharray: 2 };
     }
 }

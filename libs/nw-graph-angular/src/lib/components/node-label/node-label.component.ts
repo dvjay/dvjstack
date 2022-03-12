@@ -1,6 +1,5 @@
-import { Component, Input, EventEmitter, ElementRef, OnChanges, Output, AfterViewInit,
-    OnDestroy, SimpleChanges, ViewChild } from '@angular/core'; 
-import { INode, IEdge, NeighboursStateType } from '../../models/nw-data'; 
+import { Component, Input } from '@angular/core'; 
+import { INode } from '../../models/nw-data'; 
 import {NodeRelationService, CurrentMouseOverNodeOrEdge } from '../../services/node-relation.service'; 
 import {Subscription} from 'rxjs';
 import { EMPTY_STRING } from '../../utils';

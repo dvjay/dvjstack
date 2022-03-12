@@ -43,6 +43,7 @@ export function graphReducer(state = initialState, action: Action): State {
                 for(let i=0; i<layouts.length; i++) {
                     const node = layouts[i].nodes.get(colNodeId);
                     if(node && state.hasLayoutLoaded[i] === true) {
+                        console.log("DV 11");
                         node.collapsed = true;
                     }
                 }
@@ -66,6 +67,7 @@ export function graphReducer(state = initialState, action: Action): State {
                 for(let i=0; i<layouts.length; i++) {
                     const node = layouts[i].nodes.get(colNodeId);
                     if(node && state.hasLayoutLoaded[i] === true) {
+                        console.log("DV 10");
                         node.collapsed = false;
                     }
                 }
@@ -145,8 +147,10 @@ export function graphReducer(state = initialState, action: Action): State {
 
             for(let [key, value] of activeLayout.nodes) {
                 if(key === rootNodeId) {
+                    console.log("DV 8");
                     value.collapsed = false;
                 } else {
+                    console.log("DV 7");
                     value.collapsed = true;
                 }
             }
@@ -178,6 +182,7 @@ export function graphReducer(state = initialState, action: Action): State {
                     }
                     const lNode = layouts[state.activeLayout].nodes.get(key);
                     if(lNode) {
+                        console.log("DV 6");
                         lNode.collapsed = isNodeCollapsed;
                     }
                 }
@@ -201,6 +206,7 @@ export function graphReducer(state = initialState, action: Action): State {
                     for(let i=0; i<layouts.length; i++) {
                         const node = layouts[i].nodes.get(key);
                         if(node && state.hasLayoutLoaded[i] === true) {
+                            console.log("DV 5");
                             node.collapsed = false;
                         }
                     }
@@ -225,8 +231,10 @@ export function graphReducer(state = initialState, action: Action): State {
                         const node = layouts[i].nodes.get(key);
                         if(node) {
                             if(key === state.rootNodeId) {
+                                console.log("DV 4");
                                 node.collapsed = false;
                             } else {
+                                console.log("DV 3");
                                 node.collapsed = true;
                             }
                         }
@@ -253,6 +261,7 @@ export function graphReducer(state = initialState, action: Action): State {
                         for(let i=0; i<layouts.length; i++) {
                             const node = layouts[i].nodes.get(combIds[0]);
                             if(node) {
+                                console.log("DV 2");
                                 node.collapsed = true;
                             }
                         }
@@ -278,6 +287,7 @@ export function graphReducer(state = initialState, action: Action): State {
                         delete value.vy; 
                         delete value.fx; 
                         delete value.fy;
+                        console.log("DV 1");
                         value.collapsed = false;
                     }
                     return newLayout;

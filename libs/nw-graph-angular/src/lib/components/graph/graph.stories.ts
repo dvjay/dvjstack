@@ -108,6 +108,7 @@ export default {
     // ),
   ],
   title: 'Network Graph',
+  argTypes: { numHopChanged: { action: 'numHopChanged' }},
 } as Meta;
 
 export const Primary = () => ({
@@ -119,17 +120,3 @@ export const Primary = () => ({
     nodeCount: 0
   },
 });
-
-// export const Default = Template.bind({});
-// console.log("checking args", {
-//   rootNodeId: nwRootNodeId,
-//   dataLoading: nwDataLoading,
-//   config: nwConfig,
-//   data: nwData
-// });
-// Default.args = {
-//     rootNodeId: nwRootNodeId,
-//     dataLoading: nwDataLoading,
-//     config: nwConfig,
-//     data: nwData
-// };

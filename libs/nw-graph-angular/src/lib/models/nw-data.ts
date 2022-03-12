@@ -3,11 +3,10 @@ import { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force';
 // import { SimulationLinkDatum, SimulationNodeDatum } from "d3";
 
 export enum NeighboursStateType {
-    NOT_LOADED, 
-    LOADING, 
-    LOADING_THEN_EXPAND, 
-    LOADING_FAILED, 
-    LOADED
+    NOT_LOADED,
+    LOADED,
+    LOADING,
+    LOADING_FAILED
 }
 
 export interface INode extends SimulationNodeDatum {
@@ -16,7 +15,9 @@ export interface INode extends SimulationNodeDatum {
     label?: string; 
     r?: number;
     r0?: number;
-    neighboursStatus?: NeighboursStateType; 
+    neighboursLoaded: boolean;
+    neighboursLoading?: boolean;
+    neighboursStatus?: NeighboursStateType;
     sourceIds?: Array<NodeId>; 
     targetIds?: Array<NodeId>; 
     [key: string]: any;
@@ -24,7 +25,7 @@ export interface INode extends SimulationNodeDatum {
     nodeType: string; 
     title: string; 
     nodeRawObject: any; 
-    collapsed: boolean; 
+    collapsed: boolean;
     color: string; 
     imagePath: string; 
     nodeDescAttribute: INodeDescAttribute;
@@ -101,4 +102,13 @@ export function cloneNwData(data: INwData) {
     for (const [key, value] of clonedNwData.edges) {
         clonedEdges.set(key, {...value});
     }
+}
+
+export enum NodeOutliningColors {
+    NODE_SELECTED = "#FF0000",
+    NODE_LOADING_FAILED = "#eb0000",
+    NODE_EXPANDED_AND_NEIGHBOURS_LOADED = "#000000",
+    NODE_EXPANDED_AND_NEIGHBOURS_NOT_LOADED = "#808080",
+    NODE_COLLAPSED_AND_NEIGHBOURS_LOADED = "#0000FF",
+    NODE_COLLAPSED_AND_NEIGHBOURS_NOT_LOADED = "#3385c6"
 }

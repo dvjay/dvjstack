@@ -120,6 +120,10 @@ export class DataBuilderService {
             nwNode.type = nwNode[this.nwConfigParser.nwConfig.node.nodeTypeAttributeKey];
             // Set Node Title 
             nwNode.label = nwNode[this.nwConfigParser.nwConfig.node.nodeTitleAttributeKey];
+            // Set Node neighboursLoaded
+            nwNode.neighboursLoaded = nwNode[this.nwConfigParser.nwConfig.node.nodeNeighborsLoadedAttributeKey];
+            // Set Node collapsed
+            nwNode.collapsed = nwNode[this.nwConfigParser.nwConfig.node.nodeCollapsedAttributeKey];
             // Set Node type name 
             nwNode.title = nodeType;
         } else {
@@ -140,15 +144,17 @@ export class DataBuilderService {
             nwNode.r = nodeRadius;
             nwNode.r0 = rootNodeRadius;
             nwNode.sourceIds = []; 
-            nwNode.targetIds = []; 
-            nwNode.neighboursStatus = NeighboursStateType.LOADED;
+            nwNode.targetIds = [];
+            nwNode.neighboursLoaded = nwNode && nwNode.neighboursLoaded === true;
+            nwNode.neighboursStatus = nwNode.neighboursLoaded ? NeighboursStateType.LOADED : NeighboursStateType.NOT_LOADED;
+            console.log("checking collapsed " + nwNode.id + " " + nwNode.collapsed);
+            nwNode.collapsed = nwNode.collapsed === true;
             nwNode.selected = false;
             nwNode.highlighted = false;
             nwNode.isRootNode = false;
             // Hack for now 
             nwNode.nodeId = nwNode.id!; 
             nwNode.nodeType = nwNode.type!;
-            nwNode.collapsed = false;
         }
     }
     private sanitizeNwEdge(nwEdge: IEdge) {

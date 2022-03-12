@@ -16,7 +16,7 @@
                 [attr.r]="selectedNodeIds!.indexOf(node!.nodeId) === -1 ? nodRadius! + (nodeBorderWidth * 3/2) : nodRadius! + (nodeBorderWidth * 5/2)">
         </svg:circle>
         <svg:circle *ngIf="selectedNodeIds!.indexOf(node!.nodeId) !== -1" 
-                class="select-node-circle"
+                [ngStyle]="selectedNodeStyle"
                 [attr.stroke-width]="nodeBorderWidth"
                 cx="0" 
                 cy="0" 

@@ -22,6 +22,8 @@ export const defaultNwNodeConfig: Readonly<NwNode> = Object.freeze({
     nodeIdAttributeKey: EMPTY_STRING, 
     nodeTypeAttributeKey: EMPTY_STRING,
     nodeTitleAttributeKey: EMPTY_STRING,
+    nodeNeighborsLoadedAttributeKey: EMPTY_STRING,
+    nodeCollapsedAttributeKey: EMPTY_STRING,
     nodeTypes: [] 
 });
 
@@ -62,6 +64,8 @@ export interface NwNode {
     nodeIdAttributeKey: string; 
     nodeTypeAttributeKey: string; 
     nodeTitleAttributeKey: string;
+    nodeNeighborsLoadedAttributeKey: string;
+    nodeCollapsedAttributeKey: string;
     nodeTypes: NwNodeType[];
 }
 

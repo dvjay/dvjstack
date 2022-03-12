@@ -175,15 +175,12 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   ngAfterViewInit() {
     this.graphContainer.nativeElement.addEventListener('scroll', this.scrollEventHandler, true); 
     this.graphContainer.nativeElement.addEventListener('wheel', this.scrollEventHandler, true);
-    // this.options.width = (this.graphContainer.nativeElement as HTMLElement).offsetWidth;
     this.options.width = DEFAULT_WIDGET_WIDTH;
     this.selectDirectLinkedFilterByNodeTypeSubscription = this.selectDirectLinkedFilterByNodeType$.subscribe(
       (graphData: INwData) => {
         this.store$.pipe(take(1)).subscribe((val: any) => {
           let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
           if(graphState.rootNodeId) {
-            // console.log("logging graph data nodes", JSON.stringify(Array.from(graphData.nodes.entries())));
-            // console.log("logging graph data edges", JSON.stringify(Array.from(graphData.edges.entries())));
             this.graphEngineService.updateGraph(graphData, graphState.rootNodeId, graphState.nodeTypes, graphState.activeLayout, graphState.enableRender);
             if(graphState.enableRender === false) {
               setTimeout(() => {
@@ -290,6 +287,10 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
       currentVisibleNodes: this.nodes,
       currentVisibleEdges: this.links 
     }));
+  }
+
+  fetchNeighborNodes(node: INode) { 
+
   }
   
   onOpenContextMenu(event: MouseEvent, currentNode: INode, nodeIdx: number) {
