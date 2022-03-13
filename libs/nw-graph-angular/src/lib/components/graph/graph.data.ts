@@ -18,7 +18,9 @@ export const config = {
               "nodeTypeAttributeKey": "v_type",
               "nodeTitleAttributeKey": "label",
               "nodeNeighborsLoadedAttributeKey": "neighboursLoaded",
+              "nodeNeighborsLoadedAttributeDefaultValue": true,
               "nodeCollapsedAttributeKey": "collapsed",
+              "nodeCollapsedAttributeDefaultValue": false,
               "nodeTypes": [{ "name": "gfctEntity",
                               "displayName": "Entity",
                               "color": "#80B9E7",
@@ -197,7 +199,6 @@ export const data = {
             "flucd": "CNS_RTL_BNK",
             "fludescription": "Consumer Retail Banking",
             "isskewed": "false",
-            "isLoaded": true,
             "@visited": true
           }
         },
@@ -211,6 +212,7 @@ export const data = {
             "flucd": "CNS_RTL_BNK",
             "fludescription": "Consumer Retail Banking",
             "isskewed": "false",
+            "collapsed": false,
             "@visited": true
           }
         },
@@ -324,8 +326,6 @@ export const data = {
             "ptyid": "10000637704",
             "flucd": "CNS_RTL_BNK",
             "fludescription": "Consumer Retail Banking",
-            "isLoaded": false,
-            "collapsed": false,
             "isskewed": "false",
             "@visited": true
           }

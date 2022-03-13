@@ -135,8 +135,20 @@ export class DataBuilderService {
         nwNode.imagePath = nodeTypeConfig && typeof nodeTypeConfig.imagePath === 'string'? nodeTypeConfig.imagePath: EMPTY_STRING;
     }
 
-    private sanitizeNwNode(nwNode: INode, nodeRadius: number, rootNodeRadius: number) { 
+    private sanitizeNwNode(nwNode: INode, nodeRadius: number, rootNodeRadius: number) {
+        let nodeNeighborsLoadedAttributeDefaultValue = true;
+        let nodeCollapsedAttributeDefaultValue = false;
+        if(this.nwConfigParser && this.nwConfigParser.nwConfig && this.nwConfigParser.nwConfig.node) { 
+            if(typeof this.nwConfigParser.nwConfig.node.nodeNeighborsLoadedAttributeDefaultValue === 'boolean') {
+                nodeNeighborsLoadedAttributeDefaultValue = this.nwConfigParser.nwConfig.node.nodeNeighborsLoadedAttributeDefaultValue;
+            }
+            if(typeof this.nwConfigParser.nwConfig.node.nodeCollapsedAttributeDefaultValue === 'boolean') {
+                nodeCollapsedAttributeDefaultValue = this.nwConfigParser.nwConfig.node.nodeCollapsedAttributeDefaultValue;
+            }
+        }
+
         if(typeof nwNode === 'object') {
+            debugger;
             nwNode.id = nwNode && (typeof nwNode.id === 'string' || typeof nwNode.id === 'number') ? 
                         nwNode.id.toString(): EMPTY_STRING; 
             nwNode.type = nwNode && (typeof nwNode.type === 'string' || typeof nwNode.type === 'number') ? 
@@ -145,10 +157,9 @@ export class DataBuilderService {
             nwNode.r0 = rootNodeRadius;
             nwNode.sourceIds = []; 
             nwNode.targetIds = [];
-            nwNode.neighboursLoaded = nwNode && nwNode.neighboursLoaded === true;
+            nwNode.neighboursLoaded = nwNode && typeof nwNode.neighboursLoaded === 'boolean'? nwNode.neighboursLoaded : nodeNeighborsLoadedAttributeDefaultValue;
             nwNode.neighboursStatus = nwNode.neighboursLoaded ? NeighboursStateType.LOADED : NeighboursStateType.NOT_LOADED;
-            console.log("checking collapsed " + nwNode.id + " " + nwNode.collapsed);
-            nwNode.collapsed = nwNode.collapsed === true;
+            nwNode.collapsed = nwNode && typeof nwNode.collapsed === 'boolean'? nwNode.collapsed : nodeCollapsedAttributeDefaultValue;
             nwNode.selected = false;
             nwNode.highlighted = false;
             nwNode.isRootNode = false;

@@ -101,10 +101,20 @@ export class ConfigParserService {
         } else {
             console.error(`${ERROR_STR}Invalid nodeNeighborsLoadedAttributeKey for Nodes`);
         }
+        if(nodeRawConfig && typeof nodeRawConfig.nodeNeighborsLoadedAttributeDefaultValue === 'boolean') {
+            this.nwConfig.node.nodeNeighborsLoadedAttributeDefaultValue = nodeRawConfig.nodeNeighborsLoadedAttributeDefaultValue;
+        } else {
+            this.nwConfig.node.nodeNeighborsLoadedAttributeDefaultValue = true;
+        }
         if(nodeRawConfig && typeof nodeRawConfig.nodeCollapsedAttributeKey === 'string' && nodeRawConfig.nodeCollapsedAttributeKey.length > 0) {
             this.nwConfig.node.nodeCollapsedAttributeKey = nodeRawConfig.nodeCollapsedAttributeKey;
         } else {
             console.error(`${ERROR_STR}Invalid nodeCollapsedAttributeKey for Nodes`);
+        }
+        if(nodeRawConfig && typeof nodeRawConfig.nodeCollapsedAttributeDefaultValue === 'boolean') {
+            this.nwConfig.node.nodeCollapsedAttributeDefaultValue = nodeRawConfig.nodeCollapsedAttributeDefaultValue;
+        } else {
+            this.nwConfig.node.nodeCollapsedAttributeDefaultValue = false;
         }
     }
     
