@@ -12,6 +12,7 @@ export enum ActionTypes {
     COLLAPSE_NODE = '[NW]COLLAPSE_NODE',
     RESET_GRAPH = '[NW]RESET_GRAPH',
     RESET_NODES_POSITIONS = '[NW]RESET_NODES_POSITIONS',
+    RESET_VISIBLE_NODES_POSITIONS = '[NW]RESET_VISIBLE_NODES_POSITIONS',
     LOAD_EXTERNAL_DATA = '[NW]LOAD_EXTERNAL_DATA',
     EXPAND_ONLY_ROOT_NODE = '[NW]EXPAND_ONLY_ROOT_NODE',
     EXPAND_ALL_NODES = '[NW]EXPAND_ALL_NODES',
@@ -19,23 +20,27 @@ export enum ActionTypes {
     COLLAPSE_ALL_NODES = '[NW]COLLAPSE_ALL_NODES',
     COLLAPSE_LEAF_NODES = '[NW]COLLAPSE_LEAF_NODES',
     CHANGE_ACTIVE_LAYOUT = '[NW]CHANGE_ACTIVE_LAYOUT',
-    TOGGLE_RENDER = '[NW]TOGGLE_RENDER'
+    UPDATE_NODE_LOADING_STATUS = '[NW]UPDATE_NODE_LOADING_STATUS' 
+    // TOGGLE_RENDER = '[NW]TOGGLE_RENDER'
 }
 
 export interface ExternalDataPayload { 
-    rootNodeId: string; 
+    rootNodeId: string;
     data: INwData;
     nodeTypes: string[],
     maxNodeCount: number; 
     nodeCount: number;
-    enableRender: boolean
 }
 
 export interface ChangeLayoutPayload { 
     layoutId: number;
     prevLayoutId: number;
     prevLayoutTransform: TransformInfo;
-    enableRender: boolean;
+}
+
+export interface ResetVisibleNodesPayload { 
+    layoutId: number;
+    currentVisibleNodeIds: string[];
 }
 
 export class ExcludeNodeTypes implements Action {
@@ -55,6 +60,10 @@ export class SelectOnlyClickedNode implements Action {
     public readonly type = ActionTypes.SELECT_ONLY_CLICKED_NODE; 
     constructor(public payload: string) {}
 }
+export class UpdateNodeLoadingStatus implements Action {
+    public readonly type = ActionTypes.UPDATE_NODE_LOADING_STATUS; 
+    constructor(public payload: string) {}
+}
 export class UnselectAllNodes implements Action {
     public readonly type = ActionTypes.UNSELECT_ALL_NODES; 
 }
@@ -72,20 +81,22 @@ export class ResetNodesPositions implements Action {
     public readonly type = ActionTypes.RESET_NODES_POSITIONS;
     constructor(public layoutId: number) {}
 }
+export class ResetVisibleNodesPositions implements Action {
+    public readonly type = ActionTypes.RESET_VISIBLE_NODES_POSITIONS;
+    constructor(public resetVisibleNodesPayload: ResetVisibleNodesPayload) {}
+}
 export class LoadExternalData implements Action {
     public readonly type = ActionTypes.LOAD_EXTERNAL_DATA; 
     constructor(public payload: ExternalDataPayload) {}
 }
 export class ExpandOnlyRootNode implements Action {
     public readonly type = ActionTypes.EXPAND_ONLY_ROOT_NODE;
-    constructor(public enableRender: boolean) {}
 }
 export class ExpandAllNodes implements Action {
     public readonly type = ActionTypes.EXPAND_ALL_NODES;
 }
 export class ExpandNodesAfterLoad implements Action {
     public readonly type = ActionTypes.EXPAND_NODES_AFTER_LOAD;
-    constructor(public enableRender: boolean) {}
 }
 export class CollapseAllNodes implements Action {
     public readonly type = ActionTypes.COLLAPSE_ALL_NODES;
@@ -97,10 +108,9 @@ export class ChangeActiveLayout implements Action {
     public readonly type = ActionTypes.CHANGE_ACTIVE_LAYOUT;
     constructor(public payload: ChangeLayoutPayload) {}
 }
-export class ToggleRender implements Action {
-    public readonly type = ActionTypes.TOGGLE_RENDER;
-    constructor() {}
-}
+// export class ToggleRender implements Action {
+//     public readonly type = ActionTypes.TOGGLE_RENDER;
+// }
 export type Actions = ExcludeNodeTypes
                         | ExpandNode 
                         | ToggleLabel
@@ -116,6 +126,8 @@ export type Actions = ExcludeNodeTypes
                         | ExpandNodesAfterLoad
                         | CollapseAllNodes
                         | ChangeActiveLayout
-                        | ToggleRender;
+                        | ResetVisibleNodesPositions
+                        | UpdateNodeLoadingStatus;
+                        // | ToggleRender;
     
 

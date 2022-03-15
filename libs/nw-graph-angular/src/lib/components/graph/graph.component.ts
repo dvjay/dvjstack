@@ -24,11 +24,13 @@ import { ExpandNode,
           SelectNode,
           UnselectAllNodes, 
           SelectOnlyClickedNode, 
-          ResetNodesPositions, 
+          ResetNodesPositions,
+          ResetVisibleNodesPositions, 
           LoadExternalData, 
           ExpandOnlyRootNode, 
           ChangeActiveLayout, 
-          ExpandNodesAfterLoad } from '../../store/actions';
+          ExpandNodesAfterLoad, 
+          UpdateNodeLoadingStatus} from '../../store/actions';
 import { DataBuilderService } from '../../services/data-builder.service';
 import { ConfigParserService } from '../../services/config-parser.service';
 import { IEdge, INode, INwData } from '../../models/nw-data';
@@ -41,6 +43,7 @@ import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { LayoutChangeMessage, NotificationBrokerService } from '../../services/notification-broker.service';
 import { zoomTransform} from 'd3-zoom';
 import { TransformInfo } from '../../models/load-nodes-payload';
+import { GraphUpdateService } from 'src/lib/services/graph-update.service';
 
 const DEFAULT_MAX_NODES = 150;
 // const DEFAULT_NUM_HOPS = 2;
@@ -61,6 +64,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   @Input('nodeCount') nodeCount = 0;
   @Output('numHopChanged') numHopChanged = new EventEmitter();
   @Output('dataUpdated') dataUpdated = new EventEmitter();
+  @Output('nodeDoubleClicked') nodeDoubleClicked = new EventEmitter();
   displayEdgeDirection = false;
   nodes: INode[] = [];
   links: IEdge[] = [];
@@ -75,7 +79,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   /* Observables - Begin */
   hideLabel$: Observable<boolean> | undefined;
   autoNetworkExplore$: Observable<boolean> | undefined;
-  autoNetworkExpand$: Observable<boolean> | undefined;
+  // autoNetworkExpand$: Observable<boolean> | undefined;
   rootEntityDataLoading$: Observable<boolean> | undefined;
   transformVal: TransformInfo | undefined;
   layoutId = 0;
@@ -112,11 +116,12 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
               public overlay: Overlay, 
               public viewContainerRef: ViewContainerRef, 
               public fadeinNotificationService: FadeinNotificationService,
-              public notificationBrokerService: NotificationBrokerService) { }
+              public notificationBrokerService: NotificationBrokerService,
+              public graphUpdateService: GraphUpdateService) { }
 
   ngOnInit() {
     this.hideLabel$ = this.store$.select(graphSelectors.selectIsHideLabel);
-    this.autoNetworkExpand$ = this.store$.select(graphSelectors.selectAutoNetworkExpand); 
+    // this.autoNetworkExpand$ = this.store$.select(graphSelectors.selectAutoNetworkExpand); 
     // this.layoutId$ = this.store$.select(graphSelectors.selectActiveLayout); 
     this.selectedNodeIds$ = this.store$.select(graphSelectors.selectSelectedNodeIds);
     this.highlightedNodeIds$ = this.store$.select(graphSelectors.selectHighlightedNodeIds);
@@ -134,8 +139,9 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
         const zmT = zoomTransform(this.zoomableContainer.nativeElement);
         this.store$.dispatch(new ChangeActiveLayout({ layoutId: message.currentLayout,
                                                       prevLayoutId: message.previousLayout,
-                                                      prevLayoutTransform: {x: zmT.x, y: zmT.y, k: zmT.k},
-                                                      enableRender: message.enableRender}))
+                                                      prevLayoutTransform: {x: zmT.x, y: zmT.y, k: zmT.k}
+                                                    }));
+        this.graphUpdateService.renderGraphFromStore();
       });
     
     this.graphEngineService.ticker.subscribe((d: any) => {
@@ -159,12 +165,11 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     }
     this.dataBuilderService.getNetworkData(this.data);
     this.store$.dispatch(new LoadExternalData({
-      rootNodeId: this.rootNodeId, 
+      rootNodeId: this.rootNodeId,
       data: this.dataBuilderService.nwData, 
       nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
       maxNodeCount: this.maxNodes,
-      nodeCount: this.nodeCount,
-      enableRender: false
+      nodeCount: this.nodeCount
     }));
     this.store$.pipe(take(1)).subscribe((val: any) => {
       let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
@@ -176,24 +181,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     this.graphContainer.nativeElement.addEventListener('scroll', this.scrollEventHandler, true); 
     this.graphContainer.nativeElement.addEventListener('wheel', this.scrollEventHandler, true);
     this.options.width = DEFAULT_WIDGET_WIDTH;
-    this.selectDirectLinkedFilterByNodeTypeSubscription = this.selectDirectLinkedFilterByNodeType$.subscribe(
-      (graphData: INwData) => {
-        this.store$.pipe(take(1)).subscribe((val: any) => {
-          let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
-          if(graphState.rootNodeId) {
-            this.graphEngineService.updateGraph(graphData, graphState.rootNodeId, graphState.nodeTypes, graphState.activeLayout, graphState.enableRender);
-            if(graphState.enableRender === false) {
-              setTimeout(() => {
-                if(graphState.autoNetworkExpand) {
-                  this.store$.dispatch(new ExpandNodesAfterLoad(true));
-                } else {
-                  this.store$.dispatch(new ExpandOnlyRootNode(true));
-                }
-              }, 1000);
-            }
-          }
-        });
-      });
+    this.graphUpdateService.renderGraphFromStore();
     this.selectMaxNodesExceededSubscription = this.selectMaxNodesExceeded$.subscribe(
         (maxNodesExceed: any) => { 
           if(maxNodesExceed === true) {
@@ -247,6 +235,22 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     }
   }
 
+  // renderGraphFromStore() {
+  //   this.selectDirectLinkedFilterByNodeTypeSubscription = this.selectDirectLinkedFilterByNodeType$.pipe(take(1)).subscribe(
+  //     (graphData: INwData) => {
+  //       this.renderGraph(graphData);
+  //     });
+  // }
+
+  // renderGraph(graphData: INwData) {
+  //   this.store$.pipe(take(1)).subscribe((val: any) => {
+  //     let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
+  //     if(graphState.rootNodeId) {
+  //       this.graphEngineService.updateGraph(graphData, graphState.rootNodeId, graphState.nodeTypes, graphState.activeLayout, true);
+  //     }
+  //   });
+  // }
+
   
   contextMenuClick(optionId: number, node: INode) {
     switch(optionId) { 
@@ -256,6 +260,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
           currentVisibleNodes: this.nodes, 
           currentVisibleEdges: this.links
         }));
+        this.graphUpdateService.renderGraphFromStore();
         break; 
       case 1:
         // Context menu Item 
@@ -270,7 +275,11 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
 
   resetNodePositions() {
-    this.store$.dispatch(new ResetNodesPositions(this.layoutId));
+    this.store$.dispatch(new ResetVisibleNodesPositions({
+      layoutId: this.layoutId, 
+      currentVisibleNodeIds: this.nodes.map((n) => n.nodeId)
+    }));
+    this.graphUpdateService.renderGraphFromStore();
   }
     
   selectNode(nodeId: string) {
@@ -287,10 +296,12 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
       currentVisibleNodes: this.nodes,
       currentVisibleEdges: this.links 
     }));
+    this.graphUpdateService.renderGraphFromStore();
   }
 
   fetchNeighborNodes(node: INode) { 
-
+    this.nodeDoubleClicked.emit(node.nodeId);
+    this.store$.dispatch(new UpdateNodeLoadingStatus(node.nodeId));
   }
   
   onOpenContextMenu(event: MouseEvent, currentNode: INode, nodeIdx: number) {
@@ -300,7 +311,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
   
   toggleLabel() {
-    this.store$.dispatch (new ToggleLabel());
+    this.store$.dispatch(new ToggleLabel());
   }
   
   OnChangeNumHops(numHops: any) {

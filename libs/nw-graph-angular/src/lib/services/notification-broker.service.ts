@@ -29,5 +29,4 @@ export interface NotificationMessage {
 export interface LayoutChangeMessage {
     currentLayout: number;
     previousLayout: number;
-    enableRender: boolean;
 }

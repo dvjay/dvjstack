@@ -1,14 +1,14 @@
 <ng-container>
     <div class="nw-filter-chk-row">
         <div>
-            <mat-checkbox [checked]="allComplete" [indeterminate]="someComplete()" (change)="setAll($event.checked)">
+            <mat-checkbox [checked]="allComplete" [indeterminate]="someComplete()" [disabled]="disableFilters" (change)="setAll($event.checked)">
             </mat-checkbox> 
         </div>
         <div class="nw-filter-chk-label">Check/ Uncheck All</div> 
     </div> 
     <div class="nw-filter-chk-row" *ngFor="let subtask of task.subtasks"> 
         <div class="nw-filter-chk">
-            <mat-checkbox [(ngModel)]="subtask.included" (ngModelChange)="updateAllComplete()"></mat-checkbox>
+            <mat-checkbox [(ngModel)]="subtask.included" [disabled]="disableFilters" (ngModelChange)="updateAllComplete()"></mat-checkbox>
         </div> 
         <div class="nw-filter-chk-label"> 
             <div class="nw-filter-chk-img" [style.background-color]="subtask.type!.color">

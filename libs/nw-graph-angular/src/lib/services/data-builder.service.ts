@@ -148,7 +148,6 @@ export class DataBuilderService {
         }
 
         if(typeof nwNode === 'object') {
-            debugger;
             nwNode.id = nwNode && (typeof nwNode.id === 'string' || typeof nwNode.id === 'number') ? 
                         nwNode.id.toString(): EMPTY_STRING; 
             nwNode.type = nwNode && (typeof nwNode.type === 'string' || typeof nwNode.type === 'number') ? 

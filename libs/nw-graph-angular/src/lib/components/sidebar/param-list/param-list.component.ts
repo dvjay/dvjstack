@@ -6,9 +6,8 @@ import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../../store/stat
 import * as graphSelectors from '../../../store/selectors'; 
 import { ConfigParserService } from '../../../services/config-parser.service'; 
 import { INwData } from '../../../models/nw-data';
-import { take } from 'rxjs/operators'; 
-import { ChangeActiveLayout, CollapseAllNodes, CollapseLeafNodes, ExpandAllNodes } from '../../../store/actions';
 import { NotificationBrokerService } from '../../../services/notification-broker.service';
+import { GraphUpdateService } from 'src/lib/services/graph-update.service';
 
 @Component({
     selector: 'param-list', 
@@ -23,7 +22,10 @@ export class ParamListComponent implements OnInit, OnDestroy {
     activeLayoutSub: Subscription | undefined;
     loadedLayouts: Set<number>;
 
-    constructor(private store$: Store<GraphState>, private configParserService: ConfigParserService, public notificationBrokerService: NotificationBrokerService) {
+    constructor(private store$: Store<GraphState>, 
+                private configParserService: ConfigParserService, 
+                public notificationBrokerService: NotificationBrokerService,
+                public graphUpdateService: GraphUpdateService) {
         this.loadedLayouts = new Set<number>([]);
     }
 
@@ -39,13 +41,10 @@ export class ParamListComponent implements OnInit, OnDestroy {
     }
 
     OnClickAllExpand() {
-        this.store$.dispatch(new ExpandAllNodes());
+        this.graphUpdateService.expandAllNodes();
     }
     OnClickAllCollapse() {
-        this.store$.dispatch(new CollapseAllNodes());
-    }
-    OnClickLeafCollapse() {
-        this.store$.dispatch(new CollapseLeafNodes());
+        this.graphUpdateService.collapseAllNodes();
     }
     
     ngOnInit() {

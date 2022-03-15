@@ -18,7 +18,7 @@ export const config = {
               "nodeTypeAttributeKey": "v_type",
               "nodeTitleAttributeKey": "label",
               "nodeNeighborsLoadedAttributeKey": "neighboursLoaded",
-              "nodeNeighborsLoadedAttributeDefaultValue": true,
+              "nodeNeighborsLoadedAttributeDefaultValue": false,
               "nodeCollapsedAttributeKey": "collapsed",
               "nodeCollapsedAttributeDefaultValue": false,
               "nodeTypes": [{ "name": "gfctEntity",
@@ -212,7 +212,6 @@ export const data = {
             "flucd": "CNS_RTL_BNK",
             "fludescription": "Consumer Retail Banking",
             "isskewed": "false",
-            "collapsed": false,
             "@visited": true
           }
         },
@@ -305,12 +304,12 @@ export const data = {
           }
         },
         {
-          "v_id": "302190805",
-          "v_type": "gfctParty",
+          "v_id": "90098924561",
+          "v_type": "gfctEntity",
           "attributes": {
-            "amlptyId": "302190805",
-            "partyfullname": "Manish Singhal",
-            "ptyid": "10000637303",
+            "entityid": "90098924561",
+            "entitylabel": "Manish Singhal",
+            "src": "CP",
             "flucd": "CNS_RTL_BNK",
             "fludescription": "Consumer Retail Banking",
             "isskewed": "false",
@@ -673,8 +672,8 @@ export const data = {
         },
         {
           "e_type": "has_acct",
-          "from_id": "302190805",
-          "from_type": "gfctParty",
+          "from_id": "90098924561",
+          "from_type": "gfctEntity",
           "to_type": "gfctAccount",
           "to_id": "9063500633",
           "directed": false,

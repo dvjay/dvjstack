@@ -7,6 +7,8 @@ import { Subscription, fromEvent, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { CurrentMouseOverNodeOrEdge, NodeRelationService } from '../../services/node-relation.service';
 import { ConfigParserService } from '../../services/config-parser.service';
+import { Store } from '@ngrx/store';
+import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../store/state';
 const DEFAULT_NODE_RADIUS = 20;
 const DEFAULT_NODE_BORDER_WIDTH = 4;
 
@@ -44,7 +46,8 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     constructor (private notificationBrokerService: NotificationBrokerService, 
                 private dispatchNodeLoadService: DispatchNodeLoadService, 
                 private nodeRelationService: NodeRelationService,
-                private configParserService: ConfigParserService) {
+                private configParserService: ConfigParserService,
+                private store$: Store<GraphState>) {
         this.nodeBorderWidth = configParserService && configParserService.nwConfig && configParserService.nwConfig.nodeBorderWidth ? 
                                             configParserService.nwConfig.nodeBorderWidth : DEFAULT_NODE_BORDER_WIDTH;
         this.dispatchNodeLoad = dispatchNodeLoadService.dispatchNodeLoad$.subscribe(
@@ -165,7 +168,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
         if(this.node && this.node.r) {
             nodeRadius = this.node.r;
         }
-        return this.node && this.node.nodeId === this.rootNodeId ? rootNodeRadius : nodeRadius;
+        return this.node && this.node.isRootNode ? rootNodeRadius : nodeRadius;
     }
 
 
@@ -191,7 +194,6 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                     }
                     if(this.node!.neighboursStatus === NeighboursStateType.NOT_LOADED || this.node!.neighboursStatus === NeighboursStateType.LOADING_FAILED) {
                         this.setExpandedNodeLoadingStyle();
-                        this.node!.neighboursStatus = NeighboursStateType.LOADING;
                         this.fetchNeighborNodes.emit(this.node);
                     }
                 }
@@ -225,5 +227,10 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
 
     setCollapsedNodeLoadingStyle() {
         this.nodeStyle = { stroke: NodeOutliningColors.NODE_COLLAPSED_AND_NEIGHBOURS_NOT_LOADED, strokeDasharray: 2 };
+    }
+
+    generateNeighborsPosition() {
+        const graphEngine = new GraphEngineService();
+
     }
 }

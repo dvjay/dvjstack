@@ -1,8 +1,15 @@
+import { GraphUpdateService } from 'src/lib/services/graph-update.service';
 import {
     moduleMetadata,
     Story,
     Meta,
     componentWrapperDecorator,
+    action,
+    boolean,
+    number,
+    text,
+    withKnobs,
+    object
 } from 'storybook-storykit';
 
 import { CommonModule } from '@angular/common';
@@ -53,8 +60,9 @@ import { SelectedNodesListComponent } from '../sidebar/selected-nodes-list/selec
 // import * as TaskStories from './task.stories';
 
 export default {
+    title: 'Network Graph',
     component: GraphComponent,
-    decorators: [
+    decorators: [withKnobs,
         moduleMetadata({
             //👇 Imports both components to allow component composition with Storybook
             declarations: [GraphComponent,
@@ -95,6 +103,7 @@ export default {
                             MatButtonModule],
             providers: [D3Service, 
                             GraphEngineService, 
+                            GraphUpdateService,
                             NotificationBrokerService, 
                             NodeRelationService, 
                             DispatchNodeLoadService, 
@@ -107,16 +116,30 @@ export default {
     //     (story) => `<div style="margin: 3em">${story}</div>`
     // ),
   ],
-  title: 'Network Graph',
-  argTypes: { numHopChanged: { action: 'numHopChanged' }},
+  // argTypes: {
+  //   variant: {
+  //     options: ['primary', 'secondary'],
+  //     control: { type: 'radio' },
+  //   },
+  // },
 } as Meta;
 
+export const actionsData = {
+  numHopChanged: action('numHopChanged'),
+  dataUpdated: action('dataUpdated'),
+  nodeDoubleClicked: action('nodeDoubleClicked')
+};
+
 export const Primary = () => ({
+  comsponent: GraphComponent,
   props: {
-    rootNodeId: nwRootNodeId,
+    rootNodeId: text('rootNodeId', nwRootNodeId),
     dataLoading: nwDataLoading,
     config: nwConfig,
-    data: nwData,
-    nodeCount: 0
+    data: object('data', {...nwData}),
+    nodeCount: 0,
+    numHopChanged: actionsData.numHopChanged,
+    dataUpdated: actionsData.dataUpdated,
+    nodeDoubleClicked: actionsData.nodeDoubleClicked
   },
 });

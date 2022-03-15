@@ -15,9 +15,9 @@ export const selectIsHideLabel: MemoizedSelector<object, boolean> = createSelect
     getNetworkGraphState, 
     state => state.hideLabel
 );
-export const selectAutoNetworkExpand: MemoizedSelector<object, boolean> = createSelector(
-    getNetworkGraphState, state => state. autoNetworkExpand
-);
+// export const selectAutoNetworkExpand: MemoizedSelector<object, boolean> = createSelector(
+//     getNetworkGraphState, state => state.autoNetworkExpand
+// );
 export const selectRootNodeId: MemoizedSelector<object, string | undefined> = createSelector(
     getNetworkGraphState, 
     state => state.rootNodeId
@@ -76,12 +76,12 @@ export const selectDirectLinked: MemoizedSelector<object, any> = createSelector(
                 let currentNode: INode; 
                 let neighborIds: string[];
                 
-                while (queue. length != 0) {
+                while (queue.length != 0) {
                     current = queue.shift()!; 
                     if(current && nodes.has(current)) {
                         currentNode = nodes.get(current)!; 
                         filteredNodes.set(current, currentNode); 
-                        neighborIds = [...(currentNode.sourceIds as string[]), ...(currentNode. targetIds as string[])];
+                        neighborIds = [...(currentNode.sourceIds as string[]), ...(currentNode.targetIds as string[])];
                         for (var j = 0; j < neighborIds.length; j++) {
                             const neighNode = nodes.get(neighborIds[j]); 
                             if (neighNode && neighNode.collapsed) {

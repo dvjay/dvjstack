@@ -7,6 +7,7 @@ import { ConfigParserService } from "../../../services/config-parser.service";
 import * as graphSelectors from '../../../store/selectors';
 import { take } from "rxjs/operators";
 import { ExcludeNodeTypes } from "../../../store/actions";
+import { GraphUpdateService } from "src/lib/services/graph-update.service";
 
 export interface Task {
     type: null | NwNodeType; 
@@ -29,14 +30,19 @@ export class FilterComponent implements OnInit, OnDestroy {
     allComplete: boolean = true; 
     excludedNodeTypes: string[] = []; 
     notificationUpdatedSub: Subscription | undefined; 
+    graphDataSub: Subscription | undefined; 
+    disableFilters = true;
     
-    constructor(private store$: Store<GraphState>, private configParserService: ConfigParserService) {
+    constructor(private store$: Store<GraphState>, private configParserService: ConfigParserService, private graphUpdateService: GraphUpdateService) {
     }
     
     ngOnInit() { 
         this.store$.select(graphSelectors.selectExcludedNodeTypes).pipe(take(1)).subscribe((nTypes) => {
             this.excludedNodeTypes = nTypes;
             this.loadNodeTypes(this.excludedNodeTypes); 
+        }); 
+        this.graphDataSub = this.store$.select(graphSelectors.selectGraphData).subscribe((graphData) => {
+            this.disableFilters = graphData && graphData.nodes.size > 0? false : true;
         }); 
         this.notificationUpdatedSub = this.configParserService.notificationUpdated$.subscribe(() => {
             this.loadNodeTypes(this.excludedNodeTypes);
@@ -46,6 +52,9 @@ export class FilterComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         if(this.notificationUpdatedSub) {
             this.notificationUpdatedSub.unsubscribe();
+        }
+        if(this.graphDataSub) {
+            this.graphDataSub.unsubscribe();
         }
     }
 
@@ -60,7 +69,7 @@ export class FilterComponent implements OnInit, OnDestroy {
     updateAllComplete() {
         this.allComplete = this.task.subtasks != null && this.task.subtasks.every(t => t.included); 
         if(this.allComplete) {
-            this.store$.dispatch(new ExcludeNodeTypes([]));
+            this.graphUpdateService.filterExcludeNodeTypes([]);
          } else { 
             const nTypes: string[] = []; 
             if(Array.isArray(this.task.subtasks)) {
@@ -70,7 +79,7 @@ export class FilterComponent implements OnInit, OnDestroy {
                     }
                 }); 
             }
-            this.store$.dispatch(new ExcludeNodeTypes(nTypes));
+            this.graphUpdateService.filterExcludeNodeTypes(nTypes);
         }
     }
     someComplete() : boolean {
@@ -98,10 +107,10 @@ export class FilterComponent implements OnInit, OnDestroy {
             return; 
         } 
         this.task.subtasks.forEach(t => t.included = included); 
-        if(this.allComplete) { 
-            this.store$.dispatch(new ExcludeNodeTypes([])); 
-        } else { 
-            this.store$.dispatch(new ExcludeNodeTypes(this.allPossibleNodeTypes)); 
+        if(this.allComplete) {
+            this.graphUpdateService.filterExcludeNodeTypes([]);
+        } else {
+            this.graphUpdateService.filterExcludeNodeTypes(this.allPossibleNodeTypes);
         }
     }
 }

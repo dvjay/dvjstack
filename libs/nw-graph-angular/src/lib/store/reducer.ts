@@ -1,9 +1,9 @@
-import { ActionTypes, ChangeActiveLayout, CollapseNode, ExcludeNodeTypes, ExpandNode, ExpandOnlyRootNode, LoadExternalData, ResetNodesPositions, SelectNode, SelectOnlyClickedNode } from './actions'; 
+import { ActionTypes, ChangeActiveLayout, CollapseNode, ExcludeNodeTypes, ExpandNode, ExpandOnlyRootNode, LoadExternalData, ResetNodesPositions, ResetVisibleNodesPositions, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
 import { initialState, State } from './state';
 import { Action } from '@ngrx/store';
 import { nwToString } from '../utils';
 import {cloneDeep as lodashCloneDeep, union as lodashUnion } from "lodash";
-import { EdgeId, IEdge, INode, INwData, NodeId } from '../models/nw-data';
+import { EdgeId, IEdge, INode, INwData, NeighboursStateType, NodeId } from '../models/nw-data';
 
 export function graphReducer(state = initialState, action: Action): State {
     switch(action.type) { 
@@ -13,12 +13,12 @@ export function graphReducer(state = initialState, action: Action): State {
                 hideLabel: !state.hideLabel 
             };
         }
-        case ActionTypes.TOGGLE_RENDER: { 
-            return {
-                ...state,
-                enableRender: !state.enableRender 
-            };
-        }
+        // case ActionTypes.TOGGLE_RENDER: { 
+        //     return {
+        //         ...state,
+        //         enableRender: !state.enableRender 
+        //     };
+        // }
         case ActionTypes.RESET_GRAPH: { 
             return {
                 ...initialState
@@ -43,7 +43,6 @@ export function graphReducer(state = initialState, action: Action): State {
                 for(let i=0; i<layouts.length; i++) {
                     const node = layouts[i].nodes.get(colNodeId);
                     if(node && state.hasLayoutLoaded[i] === true) {
-                        console.log("DV 11");
                         node.collapsed = true;
                     }
                 }
@@ -67,7 +66,6 @@ export function graphReducer(state = initialState, action: Action): State {
                 for(let i=0; i<layouts.length; i++) {
                     const node = layouts[i].nodes.get(colNodeId);
                     if(node && state.hasLayoutLoaded[i] === true) {
-                        console.log("DV 10");
                         node.collapsed = false;
                     }
                 }
@@ -81,49 +79,111 @@ export function graphReducer(state = initialState, action: Action): State {
         }
         case ActionTypes.LOAD_EXTERNAL_DATA: {
             const payload = (action as LoadExternalData).payload; 
-            const rootNodeId = nwToString(payload.rootNodeId);
+            let rootNodeId = nwToString(payload.rootNodeId);
             const payloadData = payload.data;
             const maxNodeCount = payload.maxNodeCount;
             const nodeCount = parseInt(payload.nodeCount.toString());
-
+            const originalRootNodeId = state.rootNodeId;
             const activeLayout = state.activeLayout;
-            const layouts = [{ nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-                                { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-                                { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}];
-            const hasLayoutLoaded = [false, false, false];
-            const layoutTransform = [{x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}];
-            hasLayoutLoaded[activeLayout] = true;
-            // const stateData = layouts[activeLayout];
+            const graphData = state.data;
             let maxNodeCountExceeded = false;
 
+            let layouts = state.layouts;
+            let hasLayoutLoaded = state.hasLayoutLoaded;
+            let layoutTransform = state.layoutTransform;
+            const stateData = state.data;
+
+            /*
             if(typeof nodeCount === 'number' && nodeCount > 0) {
                 maxNodeCountExceeded = nodeCount > maxNodeCount;
             } else {
                 maxNodeCountExceeded = payloadData.nodes.size > maxNodeCount;
             }
-            // Check if rootNodeId exist in incoming data
-            const cRootNode = payloadData.nodes.get(rootNodeId);
-            if(cRootNode) {
-                cRootNode.isRootNode = true;
-            } else {
-                console.info("Root Node is absent.")
-                return state;
-            }
-            // ToDo: Maintain the postioning of nodes if all new nodes current exist
-            layouts[0] = payloadData;
-            for(let i=1; i<layouts.length; i++) {
-                // const clonedNwData = {...payloadData};
-                const clonedNodes = new Map<NodeId, INode>();
-                const clonedEdges = new Map<EdgeId, IEdge>();
-            
+            */
+
+            if(originalRootNodeId && rootNodeId !== originalRootNodeId) {
+                layouts = [{ nodes: new Map<NodeId, INode>(layouts[0].nodes), edges: new Map<EdgeId, IEdge>(layouts[0].edges)}, 
+                    { nodes: new Map<NodeId, INode>(layouts[1].nodes), edges: new Map<EdgeId, IEdge>(layouts[1].edges)}, 
+                    { nodes: new Map<NodeId, INode>(layouts[2].nodes), edges: new Map<EdgeId, IEdge>(layouts[2].edges)}];
+                // const clonedNodes = layouts[0].nodes;
+                // const clonedEdges = layouts[0].edges;
+                // const reqRootNode = clonedNodes.get(rootNodeId);
                 for (const [key, value] of payloadData.nodes) {
-                    clonedNodes.set(key,  lodashCloneDeep(value));
+                    if(!stateData) {
+                        break;
+                    }
+                    if(stateData.nodes.has(key)) {
+                        for(let i=0; i<layouts.length; i++) {
+                            const _node = layouts[i].nodes.get(key);
+                            if(_node) {
+                                if(key === rootNodeId) {
+                                    _node.neighboursLoaded = true;
+                                    _node.neighboursStatus = NeighboursStateType.LOADED;
+                                }
+                                
+                                if(Array.isArray(_node.sourceIds) && Array.isArray(value.sourceIds)) {
+                                    for(const sId of value.sourceIds) {
+                                        if(_node.sourceIds.indexOf(sId) < 0) {
+                                            _node.sourceIds.push(sId);
+                                        }
+                                    }
+                                }
+                                if(Array.isArray(_node.targetIds) && Array.isArray(value.targetIds)) {
+                                    for(const sId of value.targetIds) {
+                                        if(_node.targetIds.indexOf(sId) < 0) {
+                                            _node.targetIds.push(sId);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        for(let i=0; i<layouts.length; i++) {
+                            const newClonedNode = lodashCloneDeep(value);
+                            newClonedNode.collapsed = true;
+                            layouts[i].nodes.set(key, newClonedNode);
+                        }
+                    }
                 }
-            
+
                 for (const [key, value] of payloadData.edges) {
-                    clonedEdges.set(key, lodashCloneDeep(value));
+                    if(stateData && !stateData.edges.has(key)) {
+                        for(let i=0; i<layouts.length; i++) {
+                            layouts[i].edges.set(key, lodashCloneDeep(value));
+                        }
+                    }
                 }
-                layouts[i] = {nodes: clonedNodes, edges: clonedEdges};
+
+                rootNodeId = originalRootNodeId;
+            } else {
+                // Check if rootNodeId exist in incoming data
+                const cRootNode = payloadData.nodes.get(rootNodeId);
+                if(cRootNode) {
+                    cRootNode.isRootNode = true;
+                } else {
+                    console.info("Root Node is absent.")
+                    return state;
+                }
+                layouts = [{ nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
+                                    { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
+                                    { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}];
+                hasLayoutLoaded = [false, false, false];
+                layoutTransform = [{x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}];
+                hasLayoutLoaded[activeLayout] = true;
+
+                for(let i=0; i<layouts.length; i++) {
+                    const clonedNodes = new Map<NodeId, INode>();
+                    const clonedEdges = new Map<EdgeId, IEdge>();
+                
+                    for (const [key, value] of payloadData.nodes) {
+                        clonedNodes.set(key,  lodashCloneDeep(value));
+                    }
+                
+                    for (const [key, value] of payloadData.edges) {
+                        clonedEdges.set(key, lodashCloneDeep(value));
+                    }
+                    layouts[i] = {nodes: clonedNodes, edges: clonedEdges};
+                }
             }
 
             return {
@@ -135,11 +195,13 @@ export function graphReducer(state = initialState, action: Action): State {
                 layoutTransform,
                 hasLayoutLoaded,
                 maxNodesExceeded: maxNodeCountExceeded,
-                enableRender: state.autoNetworkExpand? true : payload.enableRender
+                selectedNodeIds: state.selectedNodeIds,
+                excludedNodeTypes: state.excludedNodeTypes
+                // enableRender: true//state.autoNetworkExpand? true : payload.enableRender
             };
         }
         case ActionTypes.EXPAND_ONLY_ROOT_NODE: {
-            const enableRender = (action as ExpandOnlyRootNode).enableRender;
+            // const enableRender = (action as ExpandOnlyRootNode).enableRender;
             const layouts = [...state.layouts];
             const activeLayoutId = state.activeLayout;
             const rootNodeId = nwToString(state.rootNodeId);
@@ -147,10 +209,8 @@ export function graphReducer(state = initialState, action: Action): State {
 
             for(let [key, value] of activeLayout.nodes) {
                 if(key === rootNodeId) {
-                    console.log("DV 8");
                     value.collapsed = false;
                 } else {
-                    console.log("DV 7");
                     value.collapsed = true;
                 }
             }
@@ -160,11 +220,11 @@ export function graphReducer(state = initialState, action: Action): State {
                 ...state, 
                 data: layouts[activeLayoutId], 
                 layouts: layouts,
-                enableRender: enableRender
+                // enableRender: enableRender
             };
         }
         case ActionTypes.EXPAND_NODES_AFTER_LOAD: {
-            const enableRender = (action as ExpandOnlyRootNode).enableRender;
+            // const enableRender = (action as ExpandOnlyRootNode).enableRender;
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
@@ -182,7 +242,6 @@ export function graphReducer(state = initialState, action: Action): State {
                     }
                     const lNode = layouts[state.activeLayout].nodes.get(key);
                     if(lNode) {
-                        console.log("DV 6");
                         lNode.collapsed = isNodeCollapsed;
                     }
                 }
@@ -192,7 +251,7 @@ export function graphReducer(state = initialState, action: Action): State {
                 ...state,
                 layouts: layouts,
                 data: layouts[state.activeLayout],
-                enableRender: enableRender
+                // enableRender: enableRender
             };
         }
         case ActionTypes.EXPAND_ALL_NODES: {
@@ -206,7 +265,6 @@ export function graphReducer(state = initialState, action: Action): State {
                     for(let i=0; i<layouts.length; i++) {
                         const node = layouts[i].nodes.get(key);
                         if(node && state.hasLayoutLoaded[i] === true) {
-                            console.log("DV 5");
                             node.collapsed = false;
                         }
                     }
@@ -231,10 +289,8 @@ export function graphReducer(state = initialState, action: Action): State {
                         const node = layouts[i].nodes.get(key);
                         if(node) {
                             if(key === state.rootNodeId) {
-                                console.log("DV 4");
                                 node.collapsed = false;
                             } else {
-                                console.log("DV 3");
                                 node.collapsed = true;
                             }
                         }
@@ -261,7 +317,6 @@ export function graphReducer(state = initialState, action: Action): State {
                         for(let i=0; i<layouts.length; i++) {
                             const node = layouts[i].nodes.get(combIds[0]);
                             if(node) {
-                                console.log("DV 2");
                                 node.collapsed = true;
                             }
                         }
@@ -287,7 +342,6 @@ export function graphReducer(state = initialState, action: Action): State {
                         delete value.vy; 
                         delete value.fx; 
                         delete value.fy;
-                        console.log("DV 1");
                         value.collapsed = false;
                     }
                     return newLayout;
@@ -299,14 +353,38 @@ export function graphReducer(state = initialState, action: Action): State {
                 ...state,
                 activeLayout: layoutId,
                 data: layouts[layoutId],
-                enableRender: false
+                // enableRender: false
+            };
+        }
+        case ActionTypes.RESET_VISIBLE_NODES_POSITIONS: {
+            const payload = (action as ResetVisibleNodesPositions).resetVisibleNodesPayload;
+            const layouts = state.layouts.map((layout: INwData, lId: number) => {
+                if(lId === payload.layoutId) {
+                    const newLayout = {...layout};
+                    for(let [key, value] of newLayout.nodes) {
+                        if(key && payload.currentVisibleNodeIds.indexOf(key) > -1) {
+                            delete value.x; 
+                            delete value.y; 
+                            delete value.vx; 
+                            delete value.vy; 
+                            delete value.fx; 
+                            delete value.fy;
+                        }
+                    }
+                    return newLayout;
+                }
+                return {...layout};
+            });
+
+            return {
+                ...state,
+                activeLayout: payload.layoutId,
+                data: layouts[payload.layoutId],
+                // enableRender: false
             };
         }
         case ActionTypes.SELECT_NODE: {
             const nodeId = (action as SelectNode).payload;
-            // const layouts = state.layouts;
-            // const activeLayout = state.activeLayout;
-            // const node = layouts[activeLayout].nodes.get(nodeId);
             if (state.selectedNodeIds.length < 2 && nodeId) {
                 const nIdx = state.selectedNodeIds.indexOf(nodeId); 
                 if(nIdx > -1) {
@@ -328,14 +406,37 @@ export function graphReducer(state = initialState, action: Action): State {
         }
         case ActionTypes.SELECT_ONLY_CLICKED_NODE: {
             const nodeId = (action as SelectOnlyClickedNode).payload;
-            // const layouts = state.layouts;
-            // const activeLayout = state.activeLayout;
-            // const node = layouts[activeLayout].nodes.get(nodeId);
             if(nodeId) { 
                 return {
                     ... state, 
                     selectedNodeIds: [nodeId],
                     highlightedNodeIds: []
+                };
+            } else {
+                return state;
+            }
+        }
+        case ActionTypes.UPDATE_NODE_LOADING_STATUS: {
+            const nodeId = (action as UpdateNodeLoadingStatus).payload;
+            let layouts = state.layouts;
+
+            if(nodeId && state.data && state.data.nodes.has(nodeId)) { 
+                layouts = [{ nodes: new Map<NodeId, INode>(layouts[0].nodes), edges: new Map<EdgeId, IEdge>(layouts[0].edges)}, 
+                            { nodes: new Map<NodeId, INode>(layouts[1].nodes), edges: new Map<EdgeId, IEdge>(layouts[1].edges)}, 
+                            { nodes: new Map<NodeId, INode>(layouts[2].nodes), edges: new Map<EdgeId, IEdge>(layouts[2].edges)}];
+
+                for(let i=0; i<layouts.length; i++) {
+                    const _node = layouts[i].nodes.get(nodeId);
+                    if(_node) {
+                        _node.neighboursLoaded = false;
+                        _node.neighboursLoading = true;
+                        _node.neighboursStatus = NeighboursStateType.LOADING;
+                    }
+                }
+                return {
+                    ... state, 
+                    data: layouts[state.activeLayout],
+                    layouts: layouts
                 };
             } else {
                 return state;
@@ -357,7 +458,7 @@ export function graphReducer(state = initialState, action: Action): State {
                 layoutTransform: newLayoutTransform,
                 hasLayoutLoaded: newHasLayoutLoaded,
                 data: state.layouts[newActiveLayout],
-                enableRender: payload.enableRender
+                // enableRender: payload.enableRender
             };
         }
         case ActionTypes.UNSELECT_ALL_NODES: { 

@@ -7,6 +7,7 @@ import { EMPTY_STRING } from '../../utils';
 import { ConfigParserService } from '../../services/config-parser.service';
 import { Store } from '@ngrx/store';
 import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../store/state';
+import { take } from 'rxjs/operators'; 
 
 const DEFAULT_NODE_RADIUS = 20;
 const DEFAULT_LINK_OPACITY = 1;
@@ -75,6 +76,11 @@ export class LinkComponent implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
+        let rootNodeId: string | undefined = EMPTY_STRING;
+        this.store$.pipe(take(1)).subscribe((val: any) => {
+            let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
+            rootNodeId = graphState.rootNodeId;
+        });
         if (typeof changes.selectedNodeIds === "undefined" && typeof changes.highlightedNodeIds === "undefined") {
             return;
         }
@@ -106,10 +112,10 @@ export class LinkComponent implements OnChanges {
                 this.sourceRadius = this.nodeRadius + additionalSourceMargin + SOURCE_MARGIN;
                 this.targetRadius = this.nodeRadius + additionalTargetMargin + TARGET_MARGIN;
             }
-            if(this.link.sourceNodeId === this.rootNodeId) {
+            if(this.link.sourceNodeId === rootNodeId) {
                 this.sourceRadius = rootNodeRadius + additionalSourceMargin + SOURCE_MARGIN;
             }
-            if(this.link.targetNodeId === this.rootNodeId) {
+            if(this.link.targetNodeId === rootNodeId) {
                 this.targetRadius = rootNodeRadius + additionalTargetMargin + TARGET_MARGIN;
             }
         } else {
@@ -119,10 +125,10 @@ export class LinkComponent implements OnChanges {
                 this.sourceRadius = this.nodeRadius + additionalSourceMargin + MARGIN;
                 this.targetRadius = this.nodeRadius + additionalTargetMargin + MARGIN;
             }
-            if(this.link.sourceNodeId === this.rootNodeId) {
+            if(this.link.sourceNodeId === rootNodeId) {
                 this.sourceRadius = rootNodeRadius + additionalSourceMargin + MARGIN;
             }
-            if(this.link.targetNodeId === this.rootNodeId) {
+            if(this.link.targetNodeId === rootNodeId) {
                 this.targetRadius = rootNodeRadius + additionalTargetMargin + MARGIN;
             }
         }

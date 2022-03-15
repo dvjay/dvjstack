@@ -16,8 +16,8 @@ export class D3Service {
         svg.on(".zoom", null);
         container = select(containerElement);
         
-        console.log("test transform", container.attr('transform'));
-        // console.log("test transform2", zmT);
+        // console.log("test transform", container.attr('transform'));
+
         zoomed = () => {
             const transfrm = event.transform;
             container.attr('transform', `translate(${transfrm.x}, ${transfrm.y}) scale(${transfrm.k})`);

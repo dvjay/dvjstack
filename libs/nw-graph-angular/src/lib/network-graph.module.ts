@@ -42,6 +42,7 @@ import { ParamListComponent } from './components/sidebar/param-list/param-list.c
 import { RectButtonComponent } from './components/common/button/rect-button.component';
 import { DebounceClickDirective } from './directives/debounce-click.directive';
 import { SelectedNodesListComponent } from './components/sidebar/selected-nodes-list/selected-nodes-list.component';
+import { GraphUpdateService } from './services/graph-update.service';
 
 @NgModule({
   declarations: [GraphComponent,
@@ -84,7 +85,8 @@ import { SelectedNodesListComponent } from './components/sidebar/selected-nodes-
   ],
   providers: [
     D3Service, 
-    GraphEngineService, 
+    GraphEngineService,
+    GraphUpdateService,
     NotificationBrokerService, 
     NodeRelationService, 
     DispatchNodeLoadService, 

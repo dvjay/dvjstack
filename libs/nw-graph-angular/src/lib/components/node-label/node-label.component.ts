@@ -62,7 +62,7 @@ export class NodeLabelComponent {
     }
 
     get labelPosition() {
-        if(this.node!.nodeId === this.rootNodeId) {
+        if(this.node!.isRootNode) {
             return {x: -Math.abs(this.configParserService.nwConfig.rootNodeRadius), y: this.configParserService.nwConfig.rootNodeRadius + 12};
         }
         return {x: -Math.abs(this.configParserService.nwConfig.nodeRadius), y: this.configParserService.nwConfig.nodeRadius + 12};
