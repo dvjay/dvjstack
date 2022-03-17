@@ -242,10 +242,9 @@ export class DataBuilderService {
                 if(nwData.nodes.has(edge.sourceNodeId) && nwData.nodes.has(edge.targetNodeId)) {
                     const sourceNode = nwData.nodes.get(edge.sourceNodeId); 
                     const targetNode = nwData.nodes.get(edge.targetNodeId); 
-                    if(sourceNode && targetNode && Array.isArray(sourceNode.targetIds) 
-                            && Array.isArray(targetNode.sourceIds)) {
-                                sourceNode.targetIds.indexOf(edge.targetNodeId) === -1? sourceNode.targetIds.push(edge.targetNodeId) : null;
-                                targetNode.sourceIds.indexOf(edge.sourceNodeId) === -1? targetNode.sourceIds.push(edge.sourceNodeId) : null; 
+                    if(sourceNode && targetNode && Array.isArray(sourceNode.targetIds) && Array.isArray(targetNode.sourceIds)) {
+                        sourceNode.targetIds.indexOf(edge.targetNodeId) === -1? sourceNode.targetIds.push(edge.targetNodeId) : null;
+                        targetNode.sourceIds.indexOf(edge.sourceNodeId) === -1? targetNode.sourceIds.push(edge.sourceNodeId) : null; 
                     } else {
                         invalidEdgeIds.push(edge.id);
                     }

@@ -12,7 +12,7 @@ export const config = {
     "rootNodeRadius": 27,
     "nodeBorderWidth": 4,
     "nodeAlertIconSize": 17,
-    "displayEdgeDirection": false,
+    "displayEdgeDirection": true,
     "node": { "parentRawPath": ["data", "0", "printSet"],
               "nodeIdAttributeKey": "v_id",
               "nodeTypeAttributeKey": "v_type",
@@ -326,6 +326,7 @@ export const data = {
             "flucd": "CNS_RTL_BNK",
             "fludescription": "Consumer Retail Banking",
             "isskewed": "false",
+            "isLoaded": true,
             "@visited": true
           }
         },

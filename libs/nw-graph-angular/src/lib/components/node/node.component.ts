@@ -9,6 +9,7 @@ import { CurrentMouseOverNodeOrEdge, NodeRelationService } from '../../services/
 import { ConfigParserService } from '../../services/config-parser.service';
 import { Store } from '@ngrx/store';
 import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../store/state';
+import { GraphUpdateService } from '../../services/graph-update.service';
 const DEFAULT_NODE_RADIUS = 20;
 const DEFAULT_NODE_BORDER_WIDTH = 4;
 
@@ -47,6 +48,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                 private dispatchNodeLoadService: DispatchNodeLoadService, 
                 private nodeRelationService: NodeRelationService,
                 private configParserService: ConfigParserService,
+                private graphUpdateService: GraphUpdateService,
                 private store$: Store<GraphState>) {
         this.nodeBorderWidth = configParserService && configParserService.nwConfig && configParserService.nwConfig.nodeBorderWidth ? 
                                             configParserService.nwConfig.nodeBorderWidth : DEFAULT_NODE_BORDER_WIDTH;
@@ -190,7 +192,9 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                 }
                 if(event.type === 'dblclick') {
                     if(this.node!.collapsed) {
+                        this.graphUpdateService.PositionNeighborNodes(this.node!);
                         this.expandNode.emit(this.node);
+                        this.graphUpdateService.renderGraphFromStore();
                     }
                     if(this.node!.neighboursStatus === NeighboursStateType.NOT_LOADED || this.node!.neighboursStatus === NeighboursStateType.LOADING_FAILED) {
                         this.setExpandedNodeLoadingStyle();

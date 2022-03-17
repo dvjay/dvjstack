@@ -234,23 +234,6 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
       this.ref.markForCheck();
     }
   }
-
-  // renderGraphFromStore() {
-  //   this.selectDirectLinkedFilterByNodeTypeSubscription = this.selectDirectLinkedFilterByNodeType$.pipe(take(1)).subscribe(
-  //     (graphData: INwData) => {
-  //       this.renderGraph(graphData);
-  //     });
-  // }
-
-  // renderGraph(graphData: INwData) {
-  //   this.store$.pipe(take(1)).subscribe((val: any) => {
-  //     let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
-  //     if(graphState.rootNodeId) {
-  //       this.graphEngineService.updateGraph(graphData, graphState.rootNodeId, graphState.nodeTypes, graphState.activeLayout, true);
-  //     }
-  //   });
-  // }
-
   
   contextMenuClick(optionId: number, node: INode) {
     switch(optionId) { 
@@ -296,7 +279,6 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
       currentVisibleNodes: this.nodes,
       currentVisibleEdges: this.links 
     }));
-    this.graphUpdateService.renderGraphFromStore();
   }
 
   fetchNeighborNodes(node: INode) { 

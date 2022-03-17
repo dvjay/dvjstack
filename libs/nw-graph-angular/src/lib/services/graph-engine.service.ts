@@ -1,4 +1,4 @@
-import { GraphOptions } from '../models/graph-adapter';
+import { DEFAULT_GRAPH_OPTIONS, GraphOptions } from '../models/graph-adapter';
 import { EventEmitter, Injectable } from '@angular/core'; 
 import { forceSimulation, forceManyBody, forceCollide, forceLink } from 'd3-force';
 import { INode, IEdge, INwData } from '../models/nw-data'; 
@@ -15,7 +15,7 @@ export class GraphEngineService {
     public filteredData: INwData = { nodes: new Map<string, INode>(), edges: new Map<string, IEdge>() }; 
     // public dataSource: Event Emitter<INwData> = new EventEmitter(); 
     public ticker: EventEmitter<any> = new EventEmitter(); 
-    public options: GraphOptions = { width: 2000, height: 725, nodeRadius: 30 }; 
+    public options: GraphOptions = DEFAULT_GRAPH_OPTIONS; 
     public nodes: INode[] | undefined; 
     public links: IEdge[] | undefined;
     
@@ -42,7 +42,7 @@ export class GraphEngineService {
         }
     }
 
-    updateGraph(data: INwData, rootNodeId: string, nodeTypes: string[], layoutId: number, shouldRender: boolean = false) {
+    updateGraph(data: INwData, rootNode: INode, nodeTypes: string[], layoutId: number, shouldRender: boolean = false) {
         if(!data || !data.nodes || !data.nodes.size) {
             // console.log("check 1");
             // console.log(data);
@@ -62,7 +62,7 @@ export class GraphEngineService {
         }
         // console.log("check 3");
         // console.log(data);
-        this.adapter!.attachNodesPosition(data, rootNodeId, nodeTypes, layoutId);
+        this.adapter!.attachNodesPositionByLayout(data, rootNode, nodeTypes, layoutId);
         if(shouldRender) {
             this.renderGraph(data);
         }

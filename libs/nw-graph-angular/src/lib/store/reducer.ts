@@ -56,6 +56,7 @@ export function graphReducer(state = initialState, action: Action): State {
         }
         case ActionTypes.EXPAND_NODE: {
             const payload = (action as CollapseNode).payload;
+            const 
             const colNodeId = payload.nodeId;
             const layouts = state.layouts.map(item => {
                 return {...item};
@@ -102,58 +103,48 @@ export function graphReducer(state = initialState, action: Action): State {
             */
 
             if(originalRootNodeId && rootNodeId !== originalRootNodeId) {
-                layouts = [{ nodes: new Map<NodeId, INode>(layouts[0].nodes), edges: new Map<EdgeId, IEdge>(layouts[0].edges)}, 
-                    { nodes: new Map<NodeId, INode>(layouts[1].nodes), edges: new Map<EdgeId, IEdge>(layouts[1].edges)}, 
-                    { nodes: new Map<NodeId, INode>(layouts[2].nodes), edges: new Map<EdgeId, IEdge>(layouts[2].edges)}];
-                // const clonedNodes = layouts[0].nodes;
-                // const clonedEdges = layouts[0].edges;
-                // const reqRootNode = clonedNodes.get(rootNodeId);
-                for (const [key, value] of payloadData.nodes) {
-                    if(!stateData) {
-                        break;
-                    }
-                    if(stateData.nodes.has(key)) {
-                        for(let i=0; i<layouts.length; i++) {
-                            const _node = layouts[i].nodes.get(key);
-                            if(_node) {
-                                if(key === rootNodeId) {
-                                    _node.neighboursLoaded = true;
-                                    _node.neighboursStatus = NeighboursStateType.LOADED;
-                                }
-                                
-                                if(Array.isArray(_node.sourceIds) && Array.isArray(value.sourceIds)) {
-                                    for(const sId of value.sourceIds) {
-                                        if(_node.sourceIds.indexOf(sId) < 0) {
-                                            _node.sourceIds.push(sId);
-                                        }
-                                    }
-                                }
-                                if(Array.isArray(_node.targetIds) && Array.isArray(value.targetIds)) {
-                                    for(const sId of value.targetIds) {
-                                        if(_node.targetIds.indexOf(sId) < 0) {
-                                            _node.targetIds.push(sId);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        for(let i=0; i<layouts.length; i++) {
-                            const newClonedNode = lodashCloneDeep(value);
-                            newClonedNode.collapsed = true;
-                            layouts[i].nodes.set(key, newClonedNode);
-                        }
-                    }
-                }
+                layouts = [...layouts];
+                const newEdgeIds = new Set<string>();
 
                 for (const [key, value] of payloadData.edges) {
                     if(stateData && !stateData.edges.has(key)) {
+                        newEdgeIds.add(key);
                         for(let i=0; i<layouts.length; i++) {
                             layouts[i].edges.set(key, lodashCloneDeep(value));
                         }
                     }
                 }
-
+                for (const [key, value] of payloadData.nodes) {
+                    if(stateData) {
+                        for(let i=0; i<layouts.length; i++) {
+                            if(stateData.nodes.has(key)) {
+                                const _node = layouts[i].nodes.get(key);
+                                if(_node && key === rootNodeId) {
+                                    _node.neighboursLoaded = true;
+                                    _node.neighboursStatus = NeighboursStateType.LOADED;
+                                }
+                            }
+                            else {
+                                const newNode = lodashCloneDeep(value);
+                                newNode.collapsed = true;
+                                layouts[i].nodes.set(key, newNode);
+                            }
+                        }
+                    }
+                }
+                for (const edgeId of newEdgeIds) {
+                    for(let i=0; i<layouts.length; i++) {
+                        const edge = layouts[i].edges.get(edgeId);
+                        if(edge) {
+                            const sourceNode = layouts[i].nodes.get(edge.sourceNodeId); 
+                            const targetNode = layouts[i].nodes.get(edge.targetNodeId); 
+                            if(sourceNode && targetNode && Array.isArray(sourceNode.targetIds) && Array.isArray(targetNode.sourceIds)) {
+                                sourceNode.targetIds.indexOf(edge.targetNodeId) === -1? sourceNode.targetIds.push(edge.targetNodeId) : null;
+                                targetNode.sourceIds.indexOf(edge.sourceNodeId) === -1? targetNode.sourceIds.push(edge.sourceNodeId) : null; 
+                            }
+                        }
+                    }
+                }
                 rootNodeId = originalRootNodeId;
             } else {
                 // Check if rootNodeId exist in incoming data
