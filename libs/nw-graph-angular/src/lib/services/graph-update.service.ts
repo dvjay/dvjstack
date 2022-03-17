@@ -35,17 +35,20 @@ export class GraphUpdateService {
     }
 
     renderGraph(graphData: INwData) {
+        console.log("rendergraph called");
         this.store$.pipe(take(1)).subscribe((val: any) => {
             let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
-            let rootNode = graphData.nodes.get(graphState.rootNodeId);
-            if (rootNode) {
-                this.graphEngineService.updateGraph(
-                graphData,
-                rootNode,
-                graphState.nodeTypes,
-                graphState.activeLayout,
-                true
-                );
+            if(graphState && graphState.data && graphState.data.nodes.has(graphState.rootNodeId)) {
+                let rootNode = graphState.data.nodes.get(graphState.rootNodeId);
+                if (rootNode) {
+                    this.graphEngineService.updateGraph(
+                        graphData,
+                        rootNode,
+                        graphState.nodeTypes,
+                        graphState.activeLayout,
+                        true
+                    );
+                }
             }
         });
     }
