@@ -56,18 +56,34 @@ export function graphReducer(state = initialState, action: Action): State {
         }
         case ActionTypes.EXPAND_NODE: {
             const payload = (action as CollapseNode).payload;
-            const 
+            const currentVisibleNodes = payload.currentVisibleNodes;
             const colNodeId = payload.nodeId;
+            const data = state.data;
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
-            const data = state.data;
+            const currentVisibleNodeIds = currentVisibleNodes.map(item => {
+                return item.nodeId;
+            });
+            
 
             if(data) {
                 for(let i=0; i<layouts.length; i++) {
                     const node = layouts[i].nodes.get(colNodeId);
-                    if(node && state.hasLayoutLoaded[i] === true) {
+                    if(node) {
                         node.collapsed = false;
+                    }
+                }
+                for (const [key, value] of data.nodes) {
+                    if(key) {
+                        if(currentVisibleNodeIds.indexOf(key) < 0) {
+                            for(let i=0; i<layouts.length; i++) {
+                                const node = layouts[i].nodes.get(key);
+                                if(node) {
+                                    node.collapsed = true;
+                                }
+                            }
+                        }
                     }
                 }
             }
