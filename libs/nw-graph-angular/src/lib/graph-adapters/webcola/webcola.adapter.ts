@@ -17,7 +17,7 @@ export default class WebcolaAdapter implements GraphAdapter {
         this.options = options;
     }
     
-    attachNodesPositionByLayout(data: INwData, rootNode: INode, nodeTypes: string[], layoutId: number) { 
+    attachNodesPositionByLayout(data: INwData, rootNode: INode, nodeTypes: string[], layoutId: number, shouldNodesFixed: boolean) { 
         let nodeKeys: any[] = []; 
         let nodes: any[] = []; 
         let links: any[] = []; 
@@ -78,9 +78,13 @@ export default class WebcolaAdapter implements GraphAdapter {
             this.d3cola.stop();
         }
         nodes.forEach((value: any) => {
-            let _oldValue = data.nodes.get(value.name); 
+            let _oldValue = data.nodes.get(value.name);
             _oldValue!.x = value.x;
-            _oldValue!.y = value.y; 
+            _oldValue!.y = value.y;
+            if(shouldNodesFixed) {
+                _oldValue!.fx = value.x;
+                _oldValue!.fy = value.y;
+            }
         });
     }
 

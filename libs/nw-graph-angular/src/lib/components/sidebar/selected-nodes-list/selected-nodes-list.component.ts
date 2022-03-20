@@ -30,7 +30,7 @@ export class SelectedNodesListComponent implements OnInit {
     // }
     
     ngOnInit() {
-        this.store$.select(graphSelectors.selectDirectLinkedFilterByNodeType).pipe(debounceTime(1000)).subscribe(
+        this.store$.select(graphSelectors.selectGraphData).pipe(debounceTime(1000)).subscribe(
             () => {
                 this.getCurrentSelectedNodeFromStore();
             });

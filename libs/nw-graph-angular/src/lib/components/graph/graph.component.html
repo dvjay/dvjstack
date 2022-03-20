@@ -78,7 +78,7 @@
     <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="latestFocusedNodeRef"
             [cdkConnectedOverlayOpen]="isContextMenuOpen" 
             [cdkConnectedOverlayOffsetX]="0" 
-            [cdkConnectedOverlayOffsetY]="0"> 
+            [cdkConnectedOverlayOffsetY]="0" > 
             <ul class="menu" [cdkTrapFocus]="isContextMenuOpen" [cdkTrapFocusAutoCapture]="isContextMenuOpen" (focusout)="isContextMenuOpen=false" (mousewheel)="isContextMenuOpen=false"> 
                 <li *ngFor="let option of contextMenuOptions" class="menu-item"> 
                     <button type="button" class="menu-btn" (click)="contextMenuClick(option.id, latestFocusedNode!); isContextMenuOpen = false;">

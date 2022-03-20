@@ -14,68 +14,103 @@ import WebcolaAdapter from '../graph-adapters/webcola/webcola.adapter';
 
 @Injectable()
 export class GraphUpdateService {
-    selectDirectLinkedFilterByNodeType$: any;
+    selectRootNodeId$: any;
     selectGraphData$: any;
     selectExcludedNodeTypes$: any;
+    selectNodeTypes$: any;
+    selectActiveLayout$: any;
     private adapter: GraphAdapter | undefined;
     public options: GraphOptions = DEFAULT_GRAPH_OPTIONS; 
 
     constructor(private store$: Store<GraphState>, public graphEngineService: GraphEngineService) {
-        this.selectDirectLinkedFilterByNodeType$ = this.store$.select(graphSelectors.selectDirectLinkedFilterByNodeType);
+        this.selectRootNodeId$ = this.store$.select(graphSelectors.selectRootNodeId);
         this.selectGraphData$ = this.store$.select(graphSelectors.selectGraphData);
         this.selectExcludedNodeTypes$ = this.store$.select(graphSelectors.selectExcludedNodeTypes);
+        this.selectNodeTypes$ = this.store$.select(graphSelectors.selectNodeTypes);
+        this.selectActiveLayout$ = this.store$.select(graphSelectors.selectActiveLayout);
 
         this.adapter = new WebcolaAdapter(this.options); 
     }
 
-    renderGraphFromStore() {
-        this.selectDirectLinkedFilterByNodeType$.pipe(take(1)).subscribe((graphData: INwData) => {
-            this.renderGraph(graphData);
+    tickGraph() {
+        const combinedGraphData$ = combineLatest([this.selectRootNodeId$, 
+                                                    this.selectGraphData$, 
+                                                    this.selectExcludedNodeTypes$]);
+
+        combinedGraphData$.pipe(take(1)).subscribe(([rootNodeId, allNodesData, excludedNodeTypes]) => {
+            const visibleNodeData = this.getVisibleNodes(rootNodeId as string, allNodesData as INwData, excludedNodeTypes as string[]);
+            if(visibleNodeData) {
+                this.graphEngineService.updateGraph(visibleNodeData);
+            }
         });
     }
 
-    renderGraph(graphData: INwData) {
-        console.log("rendergraph called");
-        this.store$.pipe(take(1)).subscribe((val: any) => {
-            let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
-            if(graphState && graphState.data && graphState.data.nodes.has(graphState.rootNodeId)) {
-                let rootNode = graphState.data.nodes.get(graphState.rootNodeId);
-                if (rootNode) {
-                    this.graphEngineService.updateGraph(
-                        graphData,
-                        rootNode,
-                        graphState.nodeTypes,
-                        graphState.activeLayout,
-                        true
-                    );
-                }
+    positionVisibleNodes() {
+        console.log("positionVisibleNodes called.")
+        const combinedGraphData$ = combineLatest([this.selectRootNodeId$, 
+                                                    this.selectGraphData$, 
+                                                    this.selectNodeTypes$,
+                                                    this.selectExcludedNodeTypes$,
+                                                    this.selectActiveLayout$]);
+
+        combinedGraphData$.pipe(take(1)).subscribe(([rootNodeId, allNodesData, nodeTypes, excludedNodeTypes, activeLayout]) => {
+            const visibleNodeData = this.getVisibleNodes(rootNodeId as string, allNodesData as INwData, excludedNodeTypes as string[]);
+            const visibleNodes = (visibleNodeData as INwData).nodes;
+            const centeredNode = visibleNodes.get(rootNodeId as string);
+            if(visibleNodeData && centeredNode) {
+                this.adapter!.attachNodesPositionByLayout(visibleNodeData as INwData, centeredNode, nodeTypes as string[], activeLayout as number, true);
+                this.graphEngineService.updateGraph(visibleNodeData);
             }
         });
     }
 
     expandAllNodes() {
         this.store$.dispatch(new ExpandAllNodes());
-        this.renderGraphFromStore();
     }   
     collapseAllNodes() {
         this.store$.dispatch(new CollapseAllNodes());
-        this.renderGraphFromStore();
     }
 
     filterExcludeNodeTypes(nodeTypes: string[]) {
         this.store$.dispatch(new ExcludeNodeTypes(nodeTypes));
-        this.renderGraphFromStore();
     }
 
-    PositionNeighborNodes(centeredNode: INode) {
-        const combinedGraphData$ = combineLatest([this.selectGraphData$, this.selectDirectLinkedFilterByNodeType$, this.selectExcludedNodeTypes$]);
+    positionAllNodes() {
+        console.log("positionAllNodes called.")
+        const combinedGraphData$ = combineLatest([this.selectRootNodeId$, 
+            this.selectGraphData$, 
+            this.selectNodeTypes$,
+            this.selectExcludedNodeTypes$,
+            this.selectActiveLayout$]);
 
-        combinedGraphData$.pipe(take(1)).subscribe(([allNodesData, VisibleNodesData, excludedNodeTypes]) => {
+        combinedGraphData$.pipe(take(1)).subscribe(([rootNodeId, allNodesData, nodeTypes, excludedNodeTypes, activeLayout]) => {
+            const visibleNodeData = this.getVisibleNodes(rootNodeId as string, allNodesData as INwData, excludedNodeTypes as string[]);
+            const allNodes = (allNodesData as INwData).nodes;
+            const centeredNode = allNodes.get(rootNodeId as string);
+            if(allNodes && centeredNode) {
+                this.adapter!.attachNodesPositionByLayout(allNodesData as INwData, centeredNode, nodeTypes as string[], activeLayout as number, true);
+                this.graphEngineService.updateGraph(visibleNodeData);
+            }
+        });
+    }
+
+    positionNeighborNodes(centeredNodeId: string) {
+        const combinedGraphData$ = combineLatest([this.selectRootNodeId$, 
+            this.selectGraphData$, 
+            this.selectNodeTypes$,
+            this.selectExcludedNodeTypes$,
+            this.selectActiveLayout$]);
+
+        combinedGraphData$.pipe(take(1)).subscribe(([rootNodeId, allNodesData, nodeTypes, excludedNodeTypes, activeLayout]) => {
             const allNodes = (allNodesData as INwData).nodes;
             const allEdges = (allNodesData as INwData).edges;
-            const visibleNodes = (VisibleNodesData as INwData).nodes;
+            const centeredNode = allNodes.get(centeredNodeId);
+            if(!centeredNode) {
+                return;
+            }
             const centeredNodeXPos = centeredNode.x;
             const centeredNodeYPos = centeredNode.y;
+            const visibleNodeData = this.getVisibleNodes(rootNodeId as string, allNodesData as INwData, excludedNodeTypes as string[]);
             
             /* Get clicked node hidden all neighbors*/
             const allDirectNeighbourNodes = new Map<string, INode>();
@@ -87,7 +122,7 @@ export class GraphUpdateService {
             [...centeredNode.sourceIds!, ...centeredNode.targetIds!].forEach(id => {
                 const n = allNodes.get(id);
                 if(id && n) {
-                    if(!visibleNodes.has(id)) {
+                    if(!visibleNodeData.nodes.has(id)) {
                         delete n.x; delete n.fx; delete n.vx; 
                         delete n.y; delete n.fy; delete n.vy;
                     
@@ -102,14 +137,86 @@ export class GraphUpdateService {
                 }
             }
             const allDirectNeighbourData: INwData = {nodes: allDirectNeighbourNodes, edges: allDirectNeighbourEdges};
-            // const unFilteredDirectNeighbourData: INwData = {nodes: unFilteredDirectNeighbourNodes, edges: allDirectNeighbourEdges};
 
             /* generate position for unfiltered  */
-            this.adapter!.attachNodesPositionByLayout(allDirectNeighbourData, centeredNode, [], 0);
+            this.adapter!.attachNodesPositionByLayout(allDirectNeighbourData, centeredNode, nodeTypes as string[], activeLayout as number, true);
             if(centeredNodeXPos && centeredNodeYPos) {
                 this.MoveNodes(allDirectNeighbourData.nodes, centeredNode, centeredNodeXPos, centeredNodeYPos);
             }
+            this.graphEngineService.updateGraph(visibleNodeData);
         });
+    }
+
+    getVisibleNodes(rootNodeId: string, graphData: INwData, excludeNodeTypes: string[]) {
+        const directLinked = this.selectDirectLinkedNodesAndEdges(rootNodeId, graphData);
+        return this.selectDirectLinkedFilterByNodeType(directLinked, excludeNodeTypes);
+    }
+
+    selectDirectLinkedNodesAndEdges(rootNodeId: string, graphData: INwData) {
+        console.log("Check 3");
+        const nodes = graphData ? graphData.nodes: new Map<string, INode>(); 
+        const edges = graphData ? graphData.edges: new Map<string, IEdge>(); 
+        const filteredNodes = new Map<string, INode>(); 
+        const filteredLinks = new Map<string, IEdge>();
+        
+        if(rootNodeId) {
+            const rootNode = nodes.get(rootNodeId); 
+            if(rootNode && rootNode.collapsed) {
+                filteredNodes.set(rootNodeId, rootNode);
+            } else {
+                const queue = [rootNodeId]; 
+                let current: string; 
+                let currentNode: INode; 
+                let neighborIds: string[];
+                
+                while (queue.length != 0) {
+                    current = queue.shift()!; 
+                    if(current && nodes.has(current)) {
+                        currentNode = nodes.get(current)!; 
+                        filteredNodes.set(current, currentNode); 
+                        neighborIds = [...(currentNode.sourceIds as string[]), ...(currentNode.targetIds as string[])];
+                        for (var j = 0; j < neighborIds.length; j++) {
+                            const neighNode = nodes.get(neighborIds[j]); 
+                            if (neighNode && neighNode.collapsed) {
+                                filteredNodes.set(neighborIds[j], nodes.get(neighborIds[j])!);
+                            } else { 
+                                if (!filteredNodes.has(neighborIds[j])) {
+                                    queue.push(neighborIds[j]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for(let [key, value] of edges) { 
+                if(filteredNodes.has(value.sourceNodeId) && filteredNodes.has(value.targetNodeId)) {
+                    filteredLinks.set(key, value);
+                }
+            }
+        }    
+        /**Node Type Filter */ 
+        return { nodes: filteredNodes, edges: filteredLinks};
+    }
+
+    selectDirectLinkedFilterByNodeType(directLinked: INwData, excludeNodeTypes: string[]) {
+        console.log("Check 2");
+        const nodes = directLinked.nodes; 
+        const edges = directLinked.edges; 
+        const filteredNodes = new Map<string, INode>(); 
+        const filteredLinks = new Map<string, IEdge>();
+
+        for(let [key, value] of nodes) { 
+            if (key && excludeNodeTypes.indexOf(value.nodeType) === -1) {
+                filteredNodes.set(key, value);
+            }
+        }
+        for(let [key, value] of edges) {
+            if(filteredNodes.has(value.sourceNodeId) && filteredNodes.has(value.targetNodeId)) {
+                filteredLinks.set(key, value);
+            }
+        }
+        /**Node Type Filter */ 
+        return { nodes: filteredNodes, edges: filteredLinks};
     }
 
     private MoveNodes(nodes: Map<string | undefined, INode>, centerNode: INode, targetX: number, targetY: number) {

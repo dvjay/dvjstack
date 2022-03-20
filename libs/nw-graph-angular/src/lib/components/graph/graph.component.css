@@ -63,6 +63,7 @@
     align-items: center; 
     padding-right: 40px; 
     font-size: 14px;
+    margin-top: 6px;
 } 
 
 .graph-tools-item-redraw { 

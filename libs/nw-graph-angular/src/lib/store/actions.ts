@@ -14,6 +14,7 @@ export enum ActionTypes {
     RESET_NODES_POSITIONS = '[NW]RESET_NODES_POSITIONS',
     RESET_VISIBLE_NODES_POSITIONS = '[NW]RESET_VISIBLE_NODES_POSITIONS',
     LOAD_EXTERNAL_DATA = '[NW]LOAD_EXTERNAL_DATA',
+    LOAD_EXTERNAL_DELTA_DATA = '[NW]LOAD_EXTERNAL_DELTA_DATA',
     EXPAND_ONLY_ROOT_NODE = '[NW]EXPAND_ONLY_ROOT_NODE',
     EXPAND_ALL_NODES = '[NW]EXPAND_ALL_NODES',
     EXPAND_NODES_AFTER_LOAD = '[NW]EXPAND_NODES_AFTER_LOAD',
@@ -89,14 +90,15 @@ export class LoadExternalData implements Action {
     public readonly type = ActionTypes.LOAD_EXTERNAL_DATA; 
     constructor(public payload: ExternalDataPayload) {}
 }
+export class LoadExternalDeltaData implements Action {
+    public readonly type = ActionTypes.LOAD_EXTERNAL_DELTA_DATA; 
+    constructor(public payload: ExternalDataPayload) {}
+}
 export class ExpandOnlyRootNode implements Action {
     public readonly type = ActionTypes.EXPAND_ONLY_ROOT_NODE;
 }
 export class ExpandAllNodes implements Action {
     public readonly type = ActionTypes.EXPAND_ALL_NODES;
-}
-export class ExpandNodesAfterLoad implements Action {
-    public readonly type = ActionTypes.EXPAND_NODES_AFTER_LOAD;
 }
 export class CollapseAllNodes implements Action {
     public readonly type = ActionTypes.COLLAPSE_ALL_NODES;
@@ -123,7 +125,6 @@ export type Actions = ExcludeNodeTypes
                         | LoadExternalData
                         | ExpandOnlyRootNode
                         | ExpandAllNodes
-                        | ExpandNodesAfterLoad
                         | CollapseAllNodes
                         | ChangeActiveLayout
                         | ResetVisibleNodesPositions

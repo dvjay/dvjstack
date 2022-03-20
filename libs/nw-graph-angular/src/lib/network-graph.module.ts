@@ -7,7 +7,6 @@ import { TooltipDirective } from './directives/tooltip.directive';
 import { D3Service } from "./services/d3.service";
 import { GraphEngineService } from "./services/graph-engine.service";
 import { FadeinNotificationService } from "./services/fadein-notification.service";
-import { DispatchNodeLoadService } from "./services/dispatch-node-load.service";
 import { NodeRelationService } from "./services/node-relation.service";
 import { NotificationBrokerService } from "./services/notification-broker.service";
 import { ConfigParserService } from "./services/config-parser.service";
@@ -88,8 +87,7 @@ import { GraphUpdateService } from './services/graph-update.service';
     GraphEngineService,
     GraphUpdateService,
     NotificationBrokerService, 
-    NodeRelationService, 
-    DispatchNodeLoadService, 
+    NodeRelationService,
     ConfigParserService, 
     DataBuilderService, 
     FadeinNotificationService

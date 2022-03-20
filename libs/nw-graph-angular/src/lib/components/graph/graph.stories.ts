@@ -21,7 +21,6 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
 import { D3Service } from "../../services/d3.service";
 import { GraphEngineService } from "../../services/graph-engine.service";
 import { FadeinNotificationService } from "../../services/fadein-notification.service";
-import { DispatchNodeLoadService } from "../../services/dispatch-node-load.service";
 import { NodeRelationService } from "../../services/node-relation.service";
 import { NotificationBrokerService } from "../../services/notification-broker.service";
 import { ConfigParserService } from "../../services/config-parser.service";
@@ -105,8 +104,7 @@ export default {
                             GraphEngineService, 
                             GraphUpdateService,
                             NotificationBrokerService, 
-                            NodeRelationService, 
-                            DispatchNodeLoadService, 
+                            NodeRelationService,
                             ConfigParserService, 
                             DataBuilderService, 
                             FadeinNotificationService],
@@ -136,6 +134,7 @@ export const Primary = () => ({
     rootNodeId: text('rootNodeId', nwRootNodeId),
     dataLoading: nwDataLoading,
     config: nwConfig,
+    // data: object('data', {}),
     data: object('data', {...nwData}),
     nodeCount: 0,
     numHopChanged: actionsData.numHopChanged,

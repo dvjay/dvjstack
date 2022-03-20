@@ -1,7 +1,7 @@
 import { ActionTypes, ChangeActiveLayout, CollapseNode, ExcludeNodeTypes, ExpandNode, ExpandOnlyRootNode, LoadExternalData, ResetNodesPositions, ResetVisibleNodesPositions, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
 import { initialState, State } from './state';
 import { Action } from '@ngrx/store';
-import { nwToString } from '../utils';
+import { identifyFullyLoadedNodesByNumHops, nwToString } from '../utils';
 import {cloneDeep as lodashCloneDeep, union as lodashUnion } from "lodash";
 import { EdgeId, IEdge, INode, INwData, NeighboursStateType, NodeId } from '../models/nw-data';
 
@@ -13,12 +13,6 @@ export function graphReducer(state = initialState, action: Action): State {
                 hideLabel: !state.hideLabel 
             };
         }
-        // case ActionTypes.TOGGLE_RENDER: { 
-        //     return {
-        //         ...state,
-        //         enableRender: !state.enableRender 
-        //     };
-        // }
         case ActionTypes.RESET_GRAPH: { 
             return {
                 ...initialState
@@ -42,7 +36,7 @@ export function graphReducer(state = initialState, action: Action): State {
             if(data) {
                 for(let i=0; i<layouts.length; i++) {
                     const node = layouts[i].nodes.get(colNodeId);
-                    if(node && state.hasLayoutLoaded[i] === true) {
+                    if(node) {
                         node.collapsed = true;
                     }
                 }
@@ -94,6 +88,79 @@ export function graphReducer(state = initialState, action: Action): State {
                 data: layouts[state.activeLayout]
             };
         }
+        case ActionTypes.LOAD_EXTERNAL_DELTA_DATA: {
+            const payload = (action as LoadExternalData).payload; 
+            let rootNodeIdForDelta = nwToString(payload.rootNodeId);
+            const payloadData = payload.data;
+            const maxNodeCount = payload.maxNodeCount;
+            const nodeCount = parseInt(payload.nodeCount.toString());
+            const activeLayout = state.activeLayout;
+            const graphData = state.data;
+            let maxNodeCountExceeded = false;
+
+            let layouts = state.layouts;
+            let hasLayoutLoaded = state.hasLayoutLoaded;
+            let layoutTransform = state.layoutTransform;
+            const stateData = state.data;
+
+            console.log("Check 1");
+            layouts = layouts.map((lyt) => ({...lyt}));
+            const newEdgeIds = new Set<string>();
+
+            for (const [key, value] of payloadData.edges) {
+                if(stateData && !stateData.edges.has(key)) {
+                    newEdgeIds.add(key);
+                    for(let i=0; i<layouts.length; i++) {
+                        layouts[i].edges.set(key, lodashCloneDeep(value));
+                    }
+                }
+            }
+            for (const [key, value] of payloadData.nodes) {
+                if(stateData) {
+                    for(let i=0; i<layouts.length; i++) {
+                        if(stateData.nodes.has(key)) {
+                            const _node = layouts[i].nodes.get(key);
+                            if(_node && key === rootNodeIdForDelta) {
+                                _node.neighboursLoaded = true;
+                                _node.neighboursStatus = NeighboursStateType.LOADED;
+                                layouts[i].nodes.set(key, {..._node});
+                            }
+                        }
+                        else {
+                            const newNode = lodashCloneDeep(value);
+                            newNode.collapsed = true;
+                            layouts[i].nodes.set(key, newNode);
+                        }
+                    }
+                }
+            }
+            for (const edgeId of newEdgeIds) {
+                for(let i=0; i<layouts.length; i++) {
+                    const edge = layouts[i].edges.get(edgeId);
+                    if(edge) {
+                        const sourceNode = layouts[i].nodes.get(edge.sourceNodeId); 
+                        const targetNode = layouts[i].nodes.get(edge.targetNodeId); 
+                        if(sourceNode && targetNode && Array.isArray(sourceNode.targetIds) && Array.isArray(targetNode.sourceIds)) {
+                            sourceNode.targetIds.indexOf(edge.targetNodeId) === -1? sourceNode.targetIds.push(edge.targetNodeId) : null;
+                            targetNode.sourceIds.indexOf(edge.sourceNodeId) === -1? targetNode.sourceIds.push(edge.sourceNodeId) : null; 
+                        }
+                    }
+                }
+            }
+
+            return {
+                ...initialState, 
+                rootNodeId: state.rootNodeId, 
+                data: layouts[activeLayout],
+                nodeTypes: payload.nodeTypes,
+                layouts: layouts,
+                layoutTransform,
+                hasLayoutLoaded,
+                maxNodesExceeded: maxNodeCountExceeded,
+                selectedNodeIds: state.selectedNodeIds,
+                excludedNodeTypes: state.excludedNodeTypes
+            };
+        }
         case ActionTypes.LOAD_EXTERNAL_DATA: {
             const payload = (action as LoadExternalData).payload; 
             let rootNodeId = nwToString(payload.rootNodeId);
@@ -118,79 +185,34 @@ export function graphReducer(state = initialState, action: Action): State {
             }
             */
 
-            if(originalRootNodeId && rootNodeId !== originalRootNodeId) {
-                layouts = [...layouts];
-                const newEdgeIds = new Set<string>();
-
-                for (const [key, value] of payloadData.edges) {
-                    if(stateData && !stateData.edges.has(key)) {
-                        newEdgeIds.add(key);
-                        for(let i=0; i<layouts.length; i++) {
-                            layouts[i].edges.set(key, lodashCloneDeep(value));
-                        }
-                    }
-                }
-                for (const [key, value] of payloadData.nodes) {
-                    if(stateData) {
-                        for(let i=0; i<layouts.length; i++) {
-                            if(stateData.nodes.has(key)) {
-                                const _node = layouts[i].nodes.get(key);
-                                if(_node && key === rootNodeId) {
-                                    _node.neighboursLoaded = true;
-                                    _node.neighboursStatus = NeighboursStateType.LOADED;
-                                }
-                            }
-                            else {
-                                const newNode = lodashCloneDeep(value);
-                                newNode.collapsed = true;
-                                layouts[i].nodes.set(key, newNode);
-                            }
-                        }
-                    }
-                }
-                for (const edgeId of newEdgeIds) {
-                    for(let i=0; i<layouts.length; i++) {
-                        const edge = layouts[i].edges.get(edgeId);
-                        if(edge) {
-                            const sourceNode = layouts[i].nodes.get(edge.sourceNodeId); 
-                            const targetNode = layouts[i].nodes.get(edge.targetNodeId); 
-                            if(sourceNode && targetNode && Array.isArray(sourceNode.targetIds) && Array.isArray(targetNode.sourceIds)) {
-                                sourceNode.targetIds.indexOf(edge.targetNodeId) === -1? sourceNode.targetIds.push(edge.targetNodeId) : null;
-                                targetNode.sourceIds.indexOf(edge.sourceNodeId) === -1? targetNode.sourceIds.push(edge.sourceNodeId) : null; 
-                            }
-                        }
-                    }
-                }
-                rootNodeId = originalRootNodeId;
+            const cRootNode = payloadData.nodes.get(rootNodeId);
+            if(cRootNode) {
+                cRootNode.isRootNode = true;
             } else {
-                // Check if rootNodeId exist in incoming data
-                const cRootNode = payloadData.nodes.get(rootNodeId);
-                if(cRootNode) {
-                    cRootNode.isRootNode = true;
-                } else {
-                    console.info("Root Node is absent.")
-                    return state;
-                }
-                layouts = [{ nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-                                    { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-                                    { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}];
-                hasLayoutLoaded = [false, false, false];
-                layoutTransform = [{x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}];
+                console.info("Root Node is absent.")
+                return state;
+            }
+            layouts = [{ nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
+                                { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
+                                { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}];
+            hasLayoutLoaded = [false, false, false];
+            layoutTransform = [{x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}];
+            if(activeLayout === 0) {
                 hasLayoutLoaded[activeLayout] = true;
+            }
 
-                for(let i=0; i<layouts.length; i++) {
-                    const clonedNodes = new Map<NodeId, INode>();
-                    const clonedEdges = new Map<EdgeId, IEdge>();
-                
-                    for (const [key, value] of payloadData.nodes) {
-                        clonedNodes.set(key,  lodashCloneDeep(value));
-                    }
-                
-                    for (const [key, value] of payloadData.edges) {
-                        clonedEdges.set(key, lodashCloneDeep(value));
-                    }
-                    layouts[i] = {nodes: clonedNodes, edges: clonedEdges};
+            for(let i=0; i<layouts.length; i++) {
+                const clonedNodes = new Map<NodeId, INode>();
+                const clonedEdges = new Map<EdgeId, IEdge>();
+            
+                for (const [key, value] of payloadData.nodes) {
+                    clonedNodes.set(key,  lodashCloneDeep(value));
                 }
+            
+                for (const [key, value] of payloadData.edges) {
+                    clonedEdges.set(key, lodashCloneDeep(value));
+                }
+                layouts[i] = {nodes: clonedNodes, edges: clonedEdges};
             }
 
             return {
@@ -204,7 +226,6 @@ export function graphReducer(state = initialState, action: Action): State {
                 maxNodesExceeded: maxNodeCountExceeded,
                 selectedNodeIds: state.selectedNodeIds,
                 excludedNodeTypes: state.excludedNodeTypes
-                // enableRender: true//state.autoNetworkExpand? true : payload.enableRender
             };
         }
         case ActionTypes.EXPAND_ONLY_ROOT_NODE: {
@@ -230,48 +251,18 @@ export function graphReducer(state = initialState, action: Action): State {
                 // enableRender: enableRender
             };
         }
-        case ActionTypes.EXPAND_NODES_AFTER_LOAD: {
-            // const enableRender = (action as ExpandOnlyRootNode).enableRender;
-            const layouts = state.layouts.map(item => {
-                return {...item};
-            });
-            const data = state.data;
-
-            if(data) {
-                for(let [key, _] of data.nodes) {
-                    let isNodeCollapsed = false;
-                    for(let i=0; i<layouts.length; i++) {
-                        const node = layouts[i].nodes.get(key);
-                        if(i !== state.activeLayout && state.hasLayoutLoaded[i] === true && node && node.collapsed === true) {
-                            isNodeCollapsed = true;
-                            break;
-                        }
-                    }
-                    const lNode = layouts[state.activeLayout].nodes.get(key);
-                    if(lNode) {
-                        lNode.collapsed = isNodeCollapsed;
-                    }
-                }
-            }
-
-            return {
-                ...state,
-                layouts: layouts,
-                data: layouts[state.activeLayout],
-                // enableRender: enableRender
-            };
-        }
         case ActionTypes.EXPAND_ALL_NODES: {
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
             const data = state.data;
 
-            if(data) {
-                for(let [key, _] of data.nodes) {
+            if(state.rootNodeId && data) {
+                const loadedNodes = identifyFullyLoadedNodesByNumHops(state.rootNodeId, data, 2);
+                for(let key of loadedNodes) {
                     for(let i=0; i<layouts.length; i++) {
                         const node = layouts[i].nodes.get(key);
-                        if(node && state.hasLayoutLoaded[i] === true) {
+                        if(node) {
                             node.collapsed = false;
                         }
                     }
@@ -457,7 +448,19 @@ export function graphReducer(state = initialState, action: Action): State {
             const newLayoutTransform = [...state.layoutTransform];
             const newHasLayoutLoaded = [...state.hasLayoutLoaded];
             newLayoutTransform[prevActiveLayout] = prevLayoutTransform;
-            newHasLayoutLoaded[newActiveLayout] = true;
+            if(newActiveLayout === 0) {
+                newHasLayoutLoaded[newActiveLayout] = true;
+                for(let i=1; i<state.layouts.length; i++) {
+                    for(let [_, value] of state.layouts[i].nodes) {
+                        delete value.x; 
+                        delete value.y; 
+                        delete value.vx; 
+                        delete value.vy; 
+                        delete value.fx; 
+                        delete value.fy;
+                    }
+                }
+            }
 
             return {
                 ...state,

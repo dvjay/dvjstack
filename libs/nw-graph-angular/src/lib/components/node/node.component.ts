@@ -1,8 +1,7 @@
 import { Component, Input, EventEmitter, Output, OnDestroy, SimpleChanges, OnChanges, ElementRef, ViewChild, AfterViewInit, OnInit } from '@angular/core'; 
 import { INode, NeighboursStateType, NodeAlertIconDetails, NodeOutliningColors } from '../../models/nw-data'; 
 import { GraphEngineService } from '../../services/graph-engine.service'; 
-import { NotificationBrokerService } from '../../services/notification-broker.service'; 
-import { DispatchNodeLoadService } from '../../services/dispatch-node-load.service'; 
+import { NotificationBrokerService } from '../../services/notification-broker.service';
 import { Subscription, fromEvent, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { CurrentMouseOverNodeOrEdge, NodeRelationService } from '../../services/node-relation.service';
@@ -30,12 +29,10 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     @Output() expandNode = new EventEmitter();
     @Output() fetchNeighborNodes = new EventEmitter();
     @Output() selectNode = new EventEmitter(); 
-    @Output() selectOnlyClickedNode = new EventEmitter(); 
-    // notificationMoveOverSub: Subscription; 
-    // notificationMoveOutSub: Subscription; 
-    dispatchNodeLoad: Subscription; 
+    @Output() selectOnlyClickedNode = new EventEmitter();
     nodeRelationMouseOverSub: Subscription; 
-    nodeRelationMouseOutSub: Subscription; 
+    nodeRelationMouseOutSub: Subscription;
+    clickSubscription: Subscription | undefined;
     nodeStyle: any = { stroke: 'gray' }; 
     isUnexpandable: boolean = false; 
     blurThisNode: boolean = false;
@@ -44,20 +41,13 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     @ViewChild('noderef', { static: false }) el: ElementRef;
     selectedNodeStyle = {  cursor: 'pointer', fill: NodeOutliningColors.NODE_SELECTED };
 
-    constructor (private notificationBrokerService: NotificationBrokerService, 
-                private dispatchNodeLoadService: DispatchNodeLoadService, 
+    constructor (private notificationBrokerService: NotificationBrokerService,
                 private nodeRelationService: NodeRelationService,
                 private configParserService: ConfigParserService,
                 private graphUpdateService: GraphUpdateService,
                 private store$: Store<GraphState>) {
         this.nodeBorderWidth = configParserService && configParserService.nwConfig && configParserService.nwConfig.nodeBorderWidth ? 
                                             configParserService.nwConfig.nodeBorderWidth : DEFAULT_NODE_BORDER_WIDTH;
-        this.dispatchNodeLoad = dispatchNodeLoadService.dispatchNodeLoad$.subscribe(
-            (nodeIds: string[]) => {
-                if(Array.isArray(nodeIds) && nodeIds.indexOf(this.node!.nodeId) > -1) {
-                    this.setExpandedNodeLoadingStyle();
-                }
-        });
         this.nodeRelationMouseOverSub = nodeRelationService.notificationMoveOver$.subscribe(
             (message: CurrentMouseOverNodeOrEdge) => {
                 if(message.node) { 
@@ -148,10 +138,15 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     }
     
     ngOnDestroy() {
-        // this.notificationMoveOverSub.unsubscribe(); 
-        // this.notificationMoveOutSub.unsubscribe(); 
-        // this.nodeRelationMouseOverSub.unsubscribe(); 
-        // this.nodeRelationMouseOutSub.unsubscribe();
+        if(this.nodeRelationMouseOverSub) {
+            this.nodeRelationMouseOverSub.unsubscribe();
+        }
+        if(this.nodeRelationMouseOutSub) {
+            this.nodeRelationMouseOutSub.unsubscribe();
+        }
+        if(this.clickSubscription) {
+            this.clickSubscription.unsubscribe();
+        }
     }
 
     get nodeOpacity() {
@@ -179,7 +174,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
         const clickEvent = fromEvent<MouseEvent>(el, 'click');
         const dblClickEvent = fromEvent<MouseEvent>(el, 'dblclick');
         const eventsMerged = merge(clickEvent, dblClickEvent).pipe(debounceTime(300));
-        eventsMerged.subscribe(
+        this.clickSubscription = eventsMerged.subscribe(
             (event) => {
                 if(event.type === 'click') {
                     if(this.selectNode) { 
@@ -191,18 +186,23 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                     }
                 }
                 if(event.type === 'dblclick') {
-                    if(this.node!.collapsed) {
-                        this.graphUpdateService.PositionNeighborNodes(this.node!);
-                        this.expandNode.emit(this.node);
-                        this.graphUpdateService.renderGraphFromStore();
-                    }
-                    if(this.node!.neighboursStatus === NeighboursStateType.NOT_LOADED || this.node!.neighboursStatus === NeighboursStateType.LOADING_FAILED) {
-                        this.setExpandedNodeLoadingStyle();
-                        this.fetchNeighborNodes.emit(this.node);
+                    if(this.layoutId === 0) {
+                        if(this.node!.collapsed) {
+                            this.graphUpdateService.positionNeighborNodes(this.node!.nodeId);
+                            this.expandNode.emit(this.node);
+                        }
+                        if(this.node!.neighboursStatus === NeighboursStateType.NOT_LOADED || this.node!.neighboursStatus === NeighboursStateType.LOADING_FAILED) {
+                            this.handleNeighborsLoad();
+                        }
                     }
                 }
             }
         );
+    }
+
+    handleNeighborsLoad() {
+        this.setExpandedNodeLoadingStyle();
+        this.fetchNeighborNodes.emit(this.node);
     }
 
     handleMouseOver() {

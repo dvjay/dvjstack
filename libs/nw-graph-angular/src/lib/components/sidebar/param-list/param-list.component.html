@@ -37,8 +37,9 @@
         </form>
     </div>
     <hr class="hr2 grow">
-    <div class="expand-collapse-section">
+    <div class="expand-collapse-section" *ngIf="selectedLayout === 0">
         <nw-rect-button class="expand-collapse-section-item" [text]="'Expand All'" [height]="40" (OnClick)="OnClickAllExpand()"></nw-rect-button>
         <nw-rect-button class="expand-collapse-section-item" [text]="'Collapse All'" [height]="40" (OnClick)="OnClickAllCollapse()"></nw-rect-button>
+        <hr class="hr2 grow">
     </div>
 </div>

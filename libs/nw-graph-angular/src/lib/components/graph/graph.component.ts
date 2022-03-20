@@ -1,3 +1,4 @@
+import { ActionTypes, LoadExternalDeltaData } from './../../store/actions';
 import { EMPTY_STRING } from '../../utils';
 import { ChangeDetectionStrategy, 
           ChangeDetectorRef, 
@@ -15,7 +16,7 @@ import { ChangeDetectionStrategy,
           ViewChildren, 
           ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../store/state';
+import { State as GraphState } from '../../store/state';
 import { take } from 'rxjs/operators'; 
 import { ExpandNode, 
           CollapseNode, 
@@ -28,13 +29,12 @@ import { ExpandNode,
           ResetVisibleNodesPositions, 
           LoadExternalData, 
           ExpandOnlyRootNode, 
-          ChangeActiveLayout, 
-          ExpandNodesAfterLoad, 
+          ChangeActiveLayout,
           UpdateNodeLoadingStatus} from '../../store/actions';
 import { DataBuilderService } from '../../services/data-builder.service';
 import { ConfigParserService } from '../../services/config-parser.service';
 import { IEdge, INode, INwData } from '../../models/nw-data';
-import { Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { GraphEngineService } from '../../services/graph-engine.service';
 import * as graphSelectors from '../../store/selectors'; 
 import { Overlay } from '@angular/cdk/overlay';
@@ -44,6 +44,7 @@ import { LayoutChangeMessage, NotificationBrokerService } from '../../services/n
 import { zoomTransform} from 'd3-zoom';
 import { TransformInfo } from '../../models/load-nodes-payload';
 import { GraphUpdateService } from 'src/lib/services/graph-update.service';
+import { Actions, ofType } from '@ngrx/effects';
 
 const DEFAULT_MAX_NODES = 150;
 // const DEFAULT_NUM_HOPS = 2;
@@ -84,13 +85,15 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   transformVal: TransformInfo | undefined;
   layoutId = 0;
   // layoutId$: Observable<number | undefined> | undefined;
-  selectedNodeIds$: Observable<string[]> | undefined;
+  selectedNodeIds$: any;
   highlightedNodeIds$: Observable<string[]> | undefined;
-  selectDirectLinkedFilterByNodeType$: any;
   selectDirectLinkedFilterByNodeTypeSubscription: Subscription | undefined;
   selectMaxNodesExceeded$: any;
   selectMaxNodesExceededSubscription: Subscription | undefined;
   selectActiveLayout$: any;
+  selectGraphData$: any;
+  selectRootNodeId$: any;
+  selectLayoutTransform$: any;
   selectActiveLayoutSubscription: Subscription | undefined;
   changeLayoutSubscription: Subscription | undefined;
   numHopsChangeSubscription: Subscription | undefined;
@@ -117,19 +120,19 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
               public viewContainerRef: ViewContainerRef, 
               public fadeinNotificationService: FadeinNotificationService,
               public notificationBrokerService: NotificationBrokerService,
-              public graphUpdateService: GraphUpdateService) { }
+              public graphUpdateService: GraphUpdateService,
+              private _actions$: Actions) { }
 
   ngOnInit() {
     this.hideLabel$ = this.store$.select(graphSelectors.selectIsHideLabel);
-    // this.autoNetworkExpand$ = this.store$.select(graphSelectors.selectAutoNetworkExpand); 
-    // this.layoutId$ = this.store$.select(graphSelectors.selectActiveLayout); 
     this.selectedNodeIds$ = this.store$.select(graphSelectors.selectSelectedNodeIds);
     this.highlightedNodeIds$ = this.store$.select(graphSelectors.selectHighlightedNodeIds);
-    this.selectDirectLinkedFilterByNodeType$ = this.store$.select(graphSelectors.selectDirectLinkedFilterByNodeType); 
     this.selectMaxNodesExceeded$ = this.store$.select(graphSelectors.selectMaxNodesExceeded);
     this.selectActiveLayout$ = this.store$.select(graphSelectors.selectActiveLayout);
+    this.selectGraphData$ = this.store$.select(graphSelectors.selectGraphData);
+    this.selectRootNodeId$ = this.store$.select(graphSelectors.selectRootNodeId);
+    this.selectLayoutTransform$ = this.store$.select(graphSelectors.selectLayoutTransform);
     this.scrollEventHandler = this.scroll.bind(this);
-    // this.store$.dispatch(new ResetGraph());
 
     this.numHopsChangeSubscription = this.configParserService.notificationNumHops$.subscribe((num: number) => {
       this.OnChangeNumHops(num);
@@ -141,7 +144,6 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
                                                       prevLayoutId: message.previousLayout,
                                                       prevLayoutTransform: {x: zmT.x, y: zmT.y, k: zmT.k}
                                                     }));
-        this.graphUpdateService.renderGraphFromStore();
       });
     
     this.graphEngineService.ticker.subscribe((d: any) => {
@@ -156,32 +158,46 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     if(!rootNodeId && !config && !data) {
       return;
     }
-
-    if(!this.configParserService.nwRawConfig) {
+    if(config) {
       this.configParserService.parseConfig(this.config); 
       this.maxNodes = this.configParserService.nwConfig.maxNodeCount;
       this.displayEdgeDirection = this.configParserService.nwConfig.displayEdgeDirection;
       this.configParserService.notifyUpdated();
     }
-    this.dataBuilderService.getNetworkData(this.data);
-    this.store$.dispatch(new LoadExternalData({
-      rootNodeId: this.rootNodeId,
-      data: this.dataBuilderService.nwData, 
-      nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
-      maxNodeCount: this.maxNodes,
-      nodeCount: this.nodeCount
-    }));
-    this.store$.pipe(take(1)).subscribe((val: any) => {
-      let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
-      this.dataUpdated.emit(graphState.data);
-    });
+    if(!rootNodeId && !this.rootNodeId) {
+      return;
+    }
+
+    if(data) {
+      this.dataBuilderService.getNetworkData(data);
+      combineLatest([this.selectRootNodeId$, this.selectGraphData$]).pipe(take(1)).subscribe(([rootNodeIdFromStore, graphData]) => {
+        if(rootNodeIdFromStore && this.rootNodeId !== rootNodeIdFromStore) { //Subset of graph
+          this.store$.dispatch(new LoadExternalDeltaData({
+            rootNodeId: this.rootNodeId,
+            data: this.dataBuilderService.nwData, 
+            nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
+            maxNodeCount: this.maxNodes,
+            nodeCount: this.nodeCount
+          }));
+        } else { // for root graph
+          this.store$.dispatch(new LoadExternalData({
+            rootNodeId: this.rootNodeId,
+            data: this.dataBuilderService.nwData, 
+            nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
+            maxNodeCount: this.maxNodes,
+            nodeCount: this.nodeCount
+          }));
+        }
+        this.dataUpdated.emit(graphData);
+      });
+    }
   }
 
   ngAfterViewInit() {
     this.graphContainer.nativeElement.addEventListener('scroll', this.scrollEventHandler, true); 
     this.graphContainer.nativeElement.addEventListener('wheel', this.scrollEventHandler, true);
     this.options.width = DEFAULT_WIDGET_WIDTH;
-    this.graphUpdateService.renderGraphFromStore();
+    // this.graphUpdateService.positionVisibleNodes();
     this.selectMaxNodesExceededSubscription = this.selectMaxNodesExceeded$.subscribe(
         (maxNodesExceed: any) => { 
           if(maxNodesExceed === true) {
@@ -190,9 +206,8 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
         });
     this.selectActiveLayoutSubscription = this.selectActiveLayout$.subscribe(
         (layoutId: number) => { 
-          this.store$.pipe(take(1)).subscribe((stateVal: any) => {
-            const nwState = stateVal[STORE_GRAPH_SLICE_NAME]; 
-            this.transformVal = nwState.layoutTransform[layoutId];
+          this.selectLayoutTransform$.pipe(take(1)).subscribe((layoutTransform: any) => {
+            this.transformVal = layoutTransform[layoutId];
             this.layoutId = layoutId;
           });
         });
@@ -220,9 +235,8 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
 
   viewportClick() { 
-    this.store$.pipe(take(1)).subscribe((stateVal: any) => {
-      const nwState = stateVal[STORE_GRAPH_SLICE_NAME]; 
-      if(Array.isArray(nwState.selectedNodeIds) && nwState.selectedNodeIds.length > 0) {
+    this.selectedNodeIds$.pipe(take(1)).subscribe((selectedNodeIds: any) => {
+      if(Array.isArray(selectedNodeIds) && selectedNodeIds.length > 0) {
         this.store$.dispatch(new UnselectAllNodes());
       }
     });
@@ -243,7 +257,6 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
           currentVisibleNodes: this.nodes, 
           currentVisibleEdges: this.links
         }));
-        this.graphUpdateService.renderGraphFromStore();
         break; 
       case 1:
         // Context menu Item 
@@ -262,7 +275,6 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
       layoutId: this.layoutId, 
       currentVisibleNodeIds: this.nodes.map((n) => n.nodeId)
     }));
-    this.graphUpdateService.renderGraphFromStore();
   }
     
   selectNode(nodeId: string) {
@@ -287,9 +299,11 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
   
   onOpenContextMenu(event: MouseEvent, currentNode: INode, nodeIdx: number) {
-    this.isContextMenuOpen = true; 
-    this.latestFocusedNode = currentNode; 
-    this.latestFocusedNodeRef = this.nodeRefs!.toArray()[nodeIdx];
+    if(this.layoutId === 0) {
+      this.isContextMenuOpen = true; 
+      this.latestFocusedNode = currentNode; 
+      this.latestFocusedNodeRef = this.nodeRefs!.toArray()[nodeIdx];
+    }
   }
   
   toggleLabel() {
@@ -297,10 +311,10 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
   
   OnChangeNumHops(numHops: any) {
-    this.nodes = []; 
+    this.nodes = [];
     this.links = []; 
     this.ref.markForCheck();
-    this.store$.dispatch(new ResetGraph()); 
+    this.store$.dispatch(new ResetGraph());
     this.numHopChanged.emit(numHops);
   }
 }

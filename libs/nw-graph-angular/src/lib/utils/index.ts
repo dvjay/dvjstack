@@ -1,4 +1,5 @@
 import { toInteger } from "lodash";
+import { INwData } from "../models/nw-data";
 export const EMPTY_STRING= "";
 
 export function toPositiveInteger(param: any, defaultValue: number): number { 
@@ -61,4 +62,37 @@ export function centerArray<T>(arr: T[]): T[] {
         }
     });
     return retArr;
+}
+
+export function identifyFullyLoadedNodesByNumHops(rootNodeId: string, graphData: INwData, NumHops: number) {
+    const uniqueNodeIds = new Set<string>();
+    const temp = new Set<string>();
+    uniqueNodeIds.add(rootNodeId);
+    temp.add(rootNodeId);
+    const loadedNodeIds = [temp];
+    let hopPointer: Set<string>;
+    for (let hopIndex = 0; hopIndex < NumHops+1; hopIndex++) {
+        if (!loadedNodeIds[hopIndex + 1]) {
+            loadedNodeIds.push(new Set<string>());
+            hopPointer = loadedNodeIds[hopIndex + 1];
+            
+            for (const hIds of loadedNodeIds[hopIndex].values()) {
+                for (const [_, edg] of graphData.edges) {
+                    if(edg.sourceNodeId === hIds) {
+                        if(!uniqueNodeIds.has(edg.targetNodeId)) {
+                            uniqueNodeIds.add(edg.targetNodeId);
+                            hopPointer.add(edg.targetNodeId)
+                        }
+                    }
+                    if(edg.targetNodeId === hIds) {
+                        if(!uniqueNodeIds.has(edg.sourceNodeId)) {
+                            uniqueNodeIds.add(edg.sourceNodeId);
+                            hopPointer.add(edg.sourceNodeId)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return Array.from(uniqueNodeIds);
 }
