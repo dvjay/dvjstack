@@ -1,6 +1,5 @@
 import { INwData } from './../models/nw-data';
-import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store'; 
-import { INode, IEdge } from '../models/nw-data'; 
+import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store';
 import { State as GraphState, STORE_GRAPH_SLICE_NAME} from './state';
 import { GraphLog } from '../models/graph-log';
 import { TransformInfo } from '../models/load-nodes-payload';
@@ -10,7 +9,6 @@ export const getNetworkGraphState: MemoizedSelector<object, GraphState> = create
 export const selectGraphData: MemoizedSelector<object, INwData | null> = createSelector(
     getNetworkGraphState, 
     state => {
-        console.log("check 4");
         return state.data;
     }
 );
@@ -42,6 +40,10 @@ export const selectActiveLayout: MemoizedSelector<object, number> = createSelect
     getNetworkGraphState, 
     state => state.activeLayout
 );
+export const selectLayouts: MemoizedSelector<object, INwData[]> = createSelector(
+    getNetworkGraphState, 
+    state => state.layouts
+);
 export const selectLayoutTransform: MemoizedSelector<object, TransformInfo[]> = createSelector(
     getNetworkGraphState, 
     state => state.layoutTransform
@@ -56,7 +58,6 @@ export const selectActiveLayoutTransform: MemoizedSelector<object, TransformInfo
 export const selectExcludedNodeTypes: MemoizedSelector<object, string[]> = createSelector(
     getNetworkGraphState, 
     state => {
-        console.log("check 4a");
         return state.excludedNodeTypes;
     }
 );

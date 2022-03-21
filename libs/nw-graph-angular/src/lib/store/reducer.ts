@@ -49,9 +49,9 @@ export function graphReducer(state = initialState, action: Action): State {
             };
         }
         case ActionTypes.EXPAND_NODE: {
-            const payload = (action as CollapseNode).payload;
+            const payload = (action as ExpandNode).payload;
             const currentVisibleNodes = payload.currentVisibleNodes;
-            const colNodeId = payload.nodeId;
+            const colNodeId = payload.rootNodeId;
             const data = state.data;
             const layouts = state.layouts.map(item => {
                 return {...item};
@@ -103,7 +103,6 @@ export function graphReducer(state = initialState, action: Action): State {
             let layoutTransform = state.layoutTransform;
             const stateData = state.data;
 
-            console.log("Check 1");
             layouts = layouts.map((lyt) => ({...lyt}));
             const newEdgeIds = new Set<string>();
 
@@ -342,6 +341,24 @@ export function graphReducer(state = initialState, action: Action): State {
                         delete value.fy;
                         value.collapsed = false;
                     }
+                    // for(let [_, value] of newLayout.edges) {
+                    //     if(value && typeof value.source === 'object') {
+                    //         if(value.source.x) { delete value.source.x; }
+                    //         if(value.source.y) { delete value.source.y; }
+                    //         if(value.source.fx) { delete value.source.fx; }
+                    //         if(value.source.fy) { delete value.source.fy; }
+                    //         if(value.source.vx) { delete value.source.vx; }
+                    //         if(value.source.vy) { delete value.source.vy; }
+                    //     }
+                    //     if(value && typeof value.target === 'object') {
+                    //         if(value.target.x) { delete value.target.x; }
+                    //         if(value.target.y) { delete value.target.y; }
+                    //         if(value.target.fx) { delete value.target.fx; }
+                    //         if(value.target.fy) { delete value.target.fy; }
+                    //         if(value.target.vx) { delete value.target.vx; }
+                    //         if(value.target.vy) { delete value.target.vy; }
+                    //     }
+                    // }
                     return newLayout;
                 }
                 return {...layout};
@@ -369,6 +386,24 @@ export function graphReducer(state = initialState, action: Action): State {
                             delete value.fy;
                         }
                     }
+                    // for(let [_, value] of newLayout.edges) {
+                    //     if(value && typeof value.source === 'object') {
+                    //         if(value.source.x) { delete value.source.x; }
+                    //         if(value.source.y) { delete value.source.y; }
+                    //         if(value.source.fx) { delete value.source.fx; }
+                    //         if(value.source.fy) { delete value.source.fy; }
+                    //         if(value.source.vx) { delete value.source.vx; }
+                    //         if(value.source.vy) { delete value.source.vy; }
+                    //     }
+                    //     if(value && typeof value.target === 'object') {
+                    //         if(value.target.x) { delete value.target.x; }
+                    //         if(value.target.y) { delete value.target.y; }
+                    //         if(value.target.fx) { delete value.target.fx; }
+                    //         if(value.target.fy) { delete value.target.fy; }
+                    //         if(value.target.vx) { delete value.target.vx; }
+                    //         if(value.target.vy) { delete value.target.vy; }
+                    //     }
+                    // }
                     return newLayout;
                 }
                 return {...layout};

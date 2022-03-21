@@ -43,7 +43,7 @@ import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { LayoutChangeMessage, NotificationBrokerService } from '../../services/notification-broker.service';
 import { zoomTransform} from 'd3-zoom';
 import { TransformInfo } from '../../models/load-nodes-payload';
-import { GraphUpdateService } from 'src/lib/services/graph-update.service';
+import { GraphUpdateService } from '../../services/graph-update.service';
 import { Actions, ofType } from '@ngrx/effects';
 
 const DEFAULT_MAX_NODES = 150;
@@ -121,17 +121,18 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
               public fadeinNotificationService: FadeinNotificationService,
               public notificationBrokerService: NotificationBrokerService,
               public graphUpdateService: GraphUpdateService,
-              private _actions$: Actions) { }
+              private _actions$: Actions) {
+                this.hideLabel$ = this.store$.select(graphSelectors.selectIsHideLabel);
+                this.selectedNodeIds$ = this.store$.select(graphSelectors.selectSelectedNodeIds);
+                this.highlightedNodeIds$ = this.store$.select(graphSelectors.selectHighlightedNodeIds);
+                this.selectMaxNodesExceeded$ = this.store$.select(graphSelectors.selectMaxNodesExceeded);
+                this.selectActiveLayout$ = this.store$.select(graphSelectors.selectActiveLayout);
+                this.selectGraphData$ = this.store$.select(graphSelectors.selectGraphData);
+                this.selectRootNodeId$ = this.store$.select(graphSelectors.selectRootNodeId);
+                this.selectLayoutTransform$ = this.store$.select(graphSelectors.selectLayoutTransform);
+              }
 
   ngOnInit() {
-    this.hideLabel$ = this.store$.select(graphSelectors.selectIsHideLabel);
-    this.selectedNodeIds$ = this.store$.select(graphSelectors.selectSelectedNodeIds);
-    this.highlightedNodeIds$ = this.store$.select(graphSelectors.selectHighlightedNodeIds);
-    this.selectMaxNodesExceeded$ = this.store$.select(graphSelectors.selectMaxNodesExceeded);
-    this.selectActiveLayout$ = this.store$.select(graphSelectors.selectActiveLayout);
-    this.selectGraphData$ = this.store$.select(graphSelectors.selectGraphData);
-    this.selectRootNodeId$ = this.store$.select(graphSelectors.selectRootNodeId);
-    this.selectLayoutTransform$ = this.store$.select(graphSelectors.selectLayoutTransform);
     this.scrollEventHandler = this.scroll.bind(this);
 
     this.numHopsChangeSubscription = this.configParserService.notificationNumHops$.subscribe((num: number) => {
@@ -169,9 +170,11 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     }
 
     if(data) {
-      this.dataBuilderService.getNetworkData(data);
+      this.dataBuilderService.getNetworkData(this.data);
       combineLatest([this.selectRootNodeId$, this.selectGraphData$]).pipe(take(1)).subscribe(([rootNodeIdFromStore, graphData]) => {
+        // this.graphUpdateService
         if(rootNodeIdFromStore && this.rootNodeId !== rootNodeIdFromStore) { //Subset of graph
+          this.graphUpdateService.positionDeltaNodesFromData(this.rootNodeId, this.dataBuilderService.nwData);
           this.store$.dispatch(new LoadExternalDeltaData({
             rootNodeId: this.rootNodeId,
             data: this.dataBuilderService.nwData, 
@@ -286,10 +289,9 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
   
   expandNode(node: INode) { 
-    this.store$.dispatch(new ExpandNode ({
-      nodeId: node.nodeId, 
-      currentVisibleNodes: this.nodes,
-      currentVisibleEdges: this.links 
+    this.store$.dispatch(new ExpandNode({
+      rootNodeId: node.nodeId, 
+      currentVisibleNodes: this.nodes
     }));
   }
 

@@ -50,7 +50,7 @@ export class ExcludeNodeTypes implements Action {
 }
 export class ExpandNode implements Action {
     public readonly type = ActionTypes.EXPAND_NODE; 
-    constructor(public payload: { nodeId: string; currentVisibleNodes: INode[]; currentVisibleEdges: IEdge[];}) {
+    constructor(public payload: { rootNodeId: string; currentVisibleNodes: INode[];}) {
     }
 }
 export class SelectNode implements Action {

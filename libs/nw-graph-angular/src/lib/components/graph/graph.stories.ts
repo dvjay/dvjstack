@@ -1,4 +1,4 @@
-import { GraphUpdateService } from 'src/lib/services/graph-update.service';
+import { GraphUpdateService } from '../../services/graph-update.service';
 import {
     moduleMetadata,
     Story,

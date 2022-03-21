@@ -6,8 +6,8 @@ import { NwNodeType } from "../../../models/nw-config";
 import { ConfigParserService } from "../../../services/config-parser.service";
 import * as graphSelectors from '../../../store/selectors';
 import { take } from "rxjs/operators";
+import { GraphUpdateService } from "../../../services/graph-update.service";
 import { ExcludeNodeTypes } from "../../../store/actions";
-import { GraphUpdateService } from "src/lib/services/graph-update.service";
 
 export interface Task {
     type: null | NwNodeType; 
@@ -69,7 +69,7 @@ export class FilterComponent implements OnInit, OnDestroy {
     updateAllComplete() {
         this.allComplete = this.task.subtasks != null && this.task.subtasks.every(t => t.included); 
         if(this.allComplete) {
-            this.graphUpdateService.filterExcludeNodeTypes([]);
+            this.store$.dispatch(new ExcludeNodeTypes([]));
          } else { 
             const nTypes: string[] = []; 
             if(Array.isArray(this.task.subtasks)) {
@@ -79,7 +79,7 @@ export class FilterComponent implements OnInit, OnDestroy {
                     }
                 }); 
             }
-            this.graphUpdateService.filterExcludeNodeTypes(nTypes);
+            this.store$.dispatch(new ExcludeNodeTypes(nTypes));
         }
     }
     someComplete() : boolean {
@@ -108,9 +108,9 @@ export class FilterComponent implements OnInit, OnDestroy {
         } 
         this.task.subtasks.forEach(t => t.included = included); 
         if(this.allComplete) {
-            this.graphUpdateService.filterExcludeNodeTypes([]);
+            this.store$.dispatch(new ExcludeNodeTypes([]));
         } else {
-            this.graphUpdateService.filterExcludeNodeTypes(this.allPossibleNodeTypes);
+            this.store$.dispatch(new ExcludeNodeTypes(this.allPossibleNodeTypes));
         }
     }
 }

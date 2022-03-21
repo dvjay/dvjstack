@@ -43,34 +43,14 @@ export class GraphEngineService {
     }
 
     updateGraph(data: INwData) {
-        if(!data || !data.nodes || !data.nodes.size) {
-            this.nodes = []; 
-            this.links = []; 
-            this.ticker.emit({nodes: this.nodes, links: this.links }); 
-            return;
-        }
         this.nodes = []; 
         this.links = []; 
         this.ticker.emit({nodes: this.nodes, links: this.links }); 
+        if(!data || !data.nodes || !data.nodes.size) {
+            return;
+        }
         this.renderGraph(data);
     }
-    // updateGraph(data: INwData, rootNode: INode, nodeTypes: string[], layoutId: number, shouldNodesFixed: boolean) {
-    //     if(!data || !data.nodes || !data.nodes.size) {
-    //         this.nodes = []; 
-    //         this.links = []; 
-    //         this.ticker.emit({nodes: this.nodes, links: this.links }); 
-    //         return;
-    //     }
-    //     if(!this.simulationRequired(Array.from(data.nodes.values()))) {
-    //         this.nodes = []; 
-    //         this.links = []; 
-    //         this.ticker.emit({nodes: this.nodes, links: this.links }); 
-    //         this.renderGraph(data);
-    //         return;
-    //     }
-    //     this.adapter!.attachNodesPositionByLayout(data, rootNode, nodeTypes, layoutId, shouldNodesFixed);
-    //     this.renderGraph(data);
-    // }
 
     renderGraph(data: INwData) {
         this.nodes = Array.from(data.nodes.values()); 
@@ -80,33 +60,4 @@ export class GraphEngineService {
         forceLinks.links(this.links); 
         this.simulation.alpha(0).restart();
     }
-    
-    // nodesEqual(previousNodes: INode[], currentNodes: INode[]): boolean { 
-    //     if(previousNodes === currentNodes) {
-    //         return true;
-    //     }
-    //     if(previousNodes == null || currentNodes == null) {
-    //         return false;
-    //     }
-    //     if(previousNodes.length != currentNodes.length) {
-    //         return false;
-    //     }
-    //     for(let i = 0; i < currentNodes.length; ++i) { 
-    //         if (previousNodes.indexOf(currentNodes[i]) < 0) {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
-    // }
-    
-    // simulationRequired(currentNodes: INode[]): boolean { 
-    //     if(Array.isArray(currentNodes) && currentNodes.length > 0) { 
-    //         for(const iterator of currentNodes) { 
-    //             if(typeof iterator.x == 'undefined') {
-    //                 return true;
-    //             }
-    //         }
-    //     }
-    //     return false;
-    // }
 }

@@ -7,7 +7,8 @@ import * as graphSelectors from '../../../store/selectors';
 import { ConfigParserService } from '../../../services/config-parser.service'; 
 import { INwData } from '../../../models/nw-data';
 import { NotificationBrokerService } from '../../../services/notification-broker.service';
-import { GraphUpdateService } from 'src/lib/services/graph-update.service';
+import { GraphUpdateService } from '../../../services/graph-update.service';
+import { CollapseAllNodes, ExpandAllNodes } from '../../../store/actions';
 
 @Component({
     selector: 'param-list', 
@@ -41,10 +42,10 @@ export class ParamListComponent implements OnInit, OnDestroy {
     }
 
     OnClickAllExpand() {
-        this.graphUpdateService.expandAllNodes();
+        this.store$.dispatch(new ExpandAllNodes());
     }
     OnClickAllCollapse() {
-        this.graphUpdateService.collapseAllNodes();
+        this.store$.dispatch(new CollapseAllNodes());
     }
     
     ngOnInit() {
