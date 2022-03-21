@@ -119,9 +119,16 @@ export function graphReducer(state = initialState, action: Action): State {
                     for(let i=0; i<layouts.length; i++) {
                         if(stateData.nodes.has(key)) {
                             const _node = layouts[i].nodes.get(key);
-                            if(_node && key === rootNodeIdForDelta) {
-                                _node.neighboursLoaded = true;
-                                _node.neighboursStatus = NeighboursStateType.LOADED;
+                            if(_node) {
+                                if(key === rootNodeIdForDelta) {
+                                    _node.neighboursLoaded = true;
+                                    _node.neighboursStatus = NeighboursStateType.LOADED;
+                                } else {
+                                    if(value.neighboursLoaded === true) {
+                                        _node.neighboursLoaded = true;
+                                        _node.neighboursStatus = NeighboursStateType.LOADED;
+                                    }
+                                }
                                 layouts[i].nodes.set(key, {..._node});
                             }
                         }

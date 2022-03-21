@@ -292,7 +292,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
 
   fetchNeighborNodes(node: INode) { 
-    this.nodeDoubleClicked.emit(node.nodeId);
+    this.nodeDoubleClicked.emit({nodeId: node.nodeId, nodeType: node.nodeType});
     this.store$.dispatch(new UpdateNodeLoadingStatus(node.nodeId));
   }
   
