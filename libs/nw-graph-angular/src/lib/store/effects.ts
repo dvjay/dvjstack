@@ -3,15 +3,13 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { State as GraphState, STORE_GRAPH_SLICE_NAME} from './state';
-import { ActionTypes, ExternalDataPayload, LoadExternalDeltaData } from './actions';
+import { ActionTypes, ExpandNode, ExpandNodeContext, ExternalDataPayload, LoadExternalDeltaData } from './actions';
 import { map, tap } from 'rxjs/operators';
 import { GraphUpdateService } from '../services/graph-update.service';
 
 @Injectable()
 export class NetworkGraphEffects {
-    constructor(private actions$: Actions, 
-                private store$: Store<GraphState>,
-                public graphUpdateService: GraphUpdateService) {
+    constructor(private actions$: Actions, private graphUpdateService: GraphUpdateService) {
     }
 
     @Effect({dispatch: false})
@@ -41,11 +39,11 @@ export class NetworkGraphEffects {
         }));
 
     @Effect({dispatch: false})
-    loadDeltaRootNode$: Observable<ExternalDataPayload> = this.actions$.pipe(
+    loadDeltaRootNode$: Observable<ExpandNodeContext> = this.actions$.pipe(
         ofType(ActionTypes.EXPAND_NODE),
-        map((action: LoadExternalDeltaData) => action.payload),
+        map((action: ExpandNode) => action.payload),
         tap((payload) => {
-            this.graphUpdateService.positionNeighborNodes(payload.rootNodeId);
+            this.graphUpdateService.positionNeighborNodes(payload.rootNodeId, payload.currentVisibleNodes);
         }));
     
 }

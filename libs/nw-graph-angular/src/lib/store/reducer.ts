@@ -1,4 +1,4 @@
-import { ActionTypes, ChangeActiveLayout, CollapseNode, ExcludeNodeTypes, ExpandNode, ExpandOnlyRootNode, LoadExternalData, ResetNodesPositions, ResetVisibleNodesPositions, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
+import { ActionTypes, ChangeActiveLayout, CollapseNode, ExcludeNodeTypes, ExpandNode, ExpandNodeContext, ExpandOnlyRootNode, LoadExternalData, ResetVisibleNodesPositions, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
 import { initialState, State } from './state';
 import { Action } from '@ngrx/store';
 import { identifyFullyLoadedNodesByNumHops, nwToString } from '../utils';
@@ -49,7 +49,7 @@ export function graphReducer(state = initialState, action: Action): State {
             };
         }
         case ActionTypes.EXPAND_NODE: {
-            const payload = (action as ExpandNode).payload;
+            const payload = (action as ExpandNode).payload as ExpandNodeContext;
             const currentVisibleNodes = payload.currentVisibleNodes;
             const colNodeId = payload.rootNodeId;
             const data = state.data;
@@ -68,7 +68,7 @@ export function graphReducer(state = initialState, action: Action): State {
                         node.collapsed = false;
                     }
                 }
-                for (const [key, value] of data.nodes) {
+                for (const [key, _] of data.nodes) {
                     if(key) {
                         if(currentVisibleNodeIds.indexOf(key) < 0) {
                             for(let i=0; i<layouts.length; i++) {
@@ -106,7 +106,7 @@ export function graphReducer(state = initialState, action: Action): State {
             layouts = layouts.map((lyt) => ({...lyt}));
             const newEdgeIds = new Set<string>();
 
-            for (const [key, value] of payloadData.edges) {
+            for(const [key, value] of payloadData.edges) {
                 if(stateData && !stateData.edges.has(key)) {
                     newEdgeIds.add(key);
                     for(let i=0; i<layouts.length; i++) {
@@ -114,7 +114,7 @@ export function graphReducer(state = initialState, action: Action): State {
                     }
                 }
             }
-            for (const [key, value] of payloadData.nodes) {
+            for(const [key, value] of payloadData.nodes) {
                 if(stateData) {
                     for(let i=0; i<layouts.length; i++) {
                         if(stateData.nodes.has(key)) {
@@ -327,94 +327,8 @@ export function graphReducer(state = initialState, action: Action): State {
                 data: layouts[state.activeLayout]
             };
         }
-        case ActionTypes.RESET_NODES_POSITIONS: {
-            const layoutId = (action as ResetNodesPositions).layoutId;
-            const layouts = state.layouts.map((layout: INwData, lId: number) => {
-                if(lId === layoutId) {
-                    const newLayout = {...layout};
-                    for(let [_, value] of newLayout.nodes) {
-                        delete value.x; 
-                        delete value.y; 
-                        delete value.vx; 
-                        delete value.vy; 
-                        delete value.fx; 
-                        delete value.fy;
-                        value.collapsed = false;
-                    }
-                    // for(let [_, value] of newLayout.edges) {
-                    //     if(value && typeof value.source === 'object') {
-                    //         if(value.source.x) { delete value.source.x; }
-                    //         if(value.source.y) { delete value.source.y; }
-                    //         if(value.source.fx) { delete value.source.fx; }
-                    //         if(value.source.fy) { delete value.source.fy; }
-                    //         if(value.source.vx) { delete value.source.vx; }
-                    //         if(value.source.vy) { delete value.source.vy; }
-                    //     }
-                    //     if(value && typeof value.target === 'object') {
-                    //         if(value.target.x) { delete value.target.x; }
-                    //         if(value.target.y) { delete value.target.y; }
-                    //         if(value.target.fx) { delete value.target.fx; }
-                    //         if(value.target.fy) { delete value.target.fy; }
-                    //         if(value.target.vx) { delete value.target.vx; }
-                    //         if(value.target.vy) { delete value.target.vy; }
-                    //     }
-                    // }
-                    return newLayout;
-                }
-                return {...layout};
-            });
-
-            return {
-                ...state,
-                activeLayout: layoutId,
-                data: layouts[layoutId],
-                // enableRender: false
-            };
-        }
         case ActionTypes.RESET_VISIBLE_NODES_POSITIONS: {
-            const payload = (action as ResetVisibleNodesPositions).resetVisibleNodesPayload;
-            const layouts = state.layouts.map((layout: INwData, lId: number) => {
-                if(lId === payload.layoutId) {
-                    const newLayout = {...layout};
-                    for(let [key, value] of newLayout.nodes) {
-                        if(key && payload.currentVisibleNodeIds.indexOf(key) > -1) {
-                            delete value.x; 
-                            delete value.y; 
-                            delete value.vx; 
-                            delete value.vy; 
-                            delete value.fx; 
-                            delete value.fy;
-                        }
-                    }
-                    // for(let [_, value] of newLayout.edges) {
-                    //     if(value && typeof value.source === 'object') {
-                    //         if(value.source.x) { delete value.source.x; }
-                    //         if(value.source.y) { delete value.source.y; }
-                    //         if(value.source.fx) { delete value.source.fx; }
-                    //         if(value.source.fy) { delete value.source.fy; }
-                    //         if(value.source.vx) { delete value.source.vx; }
-                    //         if(value.source.vy) { delete value.source.vy; }
-                    //     }
-                    //     if(value && typeof value.target === 'object') {
-                    //         if(value.target.x) { delete value.target.x; }
-                    //         if(value.target.y) { delete value.target.y; }
-                    //         if(value.target.fx) { delete value.target.fx; }
-                    //         if(value.target.fy) { delete value.target.fy; }
-                    //         if(value.target.vx) { delete value.target.vx; }
-                    //         if(value.target.vy) { delete value.target.vy; }
-                    //     }
-                    // }
-                    return newLayout;
-                }
-                return {...layout};
-            });
-
-            return {
-                ...state,
-                activeLayout: payload.layoutId,
-                data: layouts[payload.layoutId],
-                // enableRender: false
-            };
+            return {...state};
         }
         case ActionTypes.SELECT_NODE: {
             const nodeId = (action as SelectNode).payload;

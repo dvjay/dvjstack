@@ -11,7 +11,6 @@ export enum ActionTypes {
     TOGGLE_LABEL = '[NW]TOGGLE_LABEL',
     COLLAPSE_NODE = '[NW]COLLAPSE_NODE',
     RESET_GRAPH = '[NW]RESET_GRAPH',
-    RESET_NODES_POSITIONS = '[NW]RESET_NODES_POSITIONS',
     RESET_VISIBLE_NODES_POSITIONS = '[NW]RESET_VISIBLE_NODES_POSITIONS',
     LOAD_EXTERNAL_DATA = '[NW]LOAD_EXTERNAL_DATA',
     LOAD_EXTERNAL_DELTA_DATA = '[NW]LOAD_EXTERNAL_DELTA_DATA',
@@ -44,13 +43,18 @@ export interface ResetVisibleNodesPayload {
     currentVisibleNodeIds: string[];
 }
 
+export interface ExpandNodeContext { 
+    rootNodeId: string;
+    currentVisibleNodes: INode[];
+}
+
 export class ExcludeNodeTypes implements Action {
     public readonly type = ActionTypes.EXCLUDE_NODE_TYPES; 
     constructor(public payload: string[]) {}
 }
 export class ExpandNode implements Action {
     public readonly type = ActionTypes.EXPAND_NODE; 
-    constructor(public payload: { rootNodeId: string; currentVisibleNodes: INode[];}) {
+    constructor(public payload: ExpandNodeContext) {
     }
 }
 export class SelectNode implements Action {
@@ -78,13 +82,9 @@ export class ResetGraph implements Action {
 export class ToggleLabel implements Action {
     public readonly type = ActionTypes.TOGGLE_LABEL;
 }
-export class ResetNodesPositions implements Action {
-    public readonly type = ActionTypes.RESET_NODES_POSITIONS;
-    constructor(public layoutId: number) {}
-}
 export class ResetVisibleNodesPositions implements Action {
     public readonly type = ActionTypes.RESET_VISIBLE_NODES_POSITIONS;
-    constructor(public resetVisibleNodesPayload: ResetVisibleNodesPayload) {}
+    constructor() {}
 }
 export class LoadExternalData implements Action {
     public readonly type = ActionTypes.LOAD_EXTERNAL_DATA; 
@@ -118,7 +118,6 @@ export type Actions = ExcludeNodeTypes
                         | ToggleLabel
                         | CollapseNode
                         | ResetGraph 
-                        | ResetNodesPositions 
                         | SelectNode
                         | SelectOnlyClickedNode 
                         | UnselectAllNodes 

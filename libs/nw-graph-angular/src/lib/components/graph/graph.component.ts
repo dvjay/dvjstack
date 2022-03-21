@@ -1,4 +1,4 @@
-import { ActionTypes, LoadExternalDeltaData } from './../../store/actions';
+import { ActionTypes, ExpandNodeContext, LoadExternalDeltaData } from './../../store/actions';
 import { EMPTY_STRING } from '../../utils';
 import { ChangeDetectionStrategy, 
           ChangeDetectorRef, 
@@ -24,8 +24,7 @@ import { ExpandNode,
           ToggleLabel, 
           SelectNode,
           UnselectAllNodes, 
-          SelectOnlyClickedNode, 
-          ResetNodesPositions,
+          SelectOnlyClickedNode,
           ResetVisibleNodesPositions, 
           LoadExternalData, 
           ExpandOnlyRootNode, 
@@ -274,10 +273,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
 
   resetNodePositions() {
-    this.store$.dispatch(new ResetVisibleNodesPositions({
-      layoutId: this.layoutId, 
-      currentVisibleNodeIds: this.nodes.map((n) => n.nodeId)
-    }));
+    this.store$.dispatch(new ResetVisibleNodesPositions());
   }
     
   selectNode(nodeId: string) {
@@ -288,10 +284,10 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     this.store$.dispatch(new SelectOnlyClickedNode(nodeId));
   }
   
-  expandNode(node: INode) { 
+  expandNode(nodeContext: ExpandNodeContext) { 
     this.store$.dispatch(new ExpandNode({
-      rootNodeId: node.nodeId, 
-      currentVisibleNodes: this.nodes
+      rootNodeId: nodeContext.rootNodeId, 
+      currentVisibleNodes: nodeContext.currentVisibleNodes
     }));
   }
 

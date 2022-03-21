@@ -9,6 +9,7 @@ import { ConfigParserService } from '../../services/config-parser.service';
 import { Store } from '@ngrx/store';
 import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../store/state';
 import { GraphUpdateService } from '../../services/graph-update.service';
+import { ExpandNodeContext } from '../../store/actions';
 const DEFAULT_NODE_RADIUS = 20;
 const DEFAULT_NODE_BORDER_WIDTH = 4;
 
@@ -104,10 +105,11 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
             switch(this.node!.neighboursStatus) {
                 case NeighboursStateType.NOT_LOADED:
                     if(this.node!.collapsed) { 
-                        this.nodeStyle = { stroke: NodeOutliningColors.NODE_COLLAPSED_AND_NEIGHBOURS_NOT_LOADED };
+                        this.nodeStyle = { stroke: NodeOutliningColors.NODE_COLLAPSED_AND_NEIGHBOURS_NOT_LOADED };// Gray
                     } else {
-                        this.nodeStyle = { stroke: NodeOutliningColors.NODE_EXPANDED_AND_NEIGHBOURS_NOT_LOADED };
+                        this.nodeStyle = { stroke: NodeOutliningColors.NODE_EXPANDED_AND_NEIGHBOURS_NOT_LOADED };// Light blue
                     }
+                    this.handleNeighborsLoad();
                     break; 
                 case NeighboursStateType.LOADING:
                     if(this.node!.collapsed) {
@@ -187,9 +189,8 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                 }
                 if(event.type === 'dblclick') {
                     if(this.layoutId === 0) {
-                        if(this.node!.collapsed) {
-                            this.graphUpdateService.positionNeighborNodes(this.node!.nodeId);
-                            this.expandNode.emit(this.node);
+                        if(this.node && this.node.collapsed && this.node.nodeId) {
+                            this.expandNode.emit({rootNodeId: this.node.nodeId, currentVisibleNodes: this.nodes} as ExpandNodeContext);
                         }
                         if(this.node!.neighboursStatus === NeighboursStateType.NOT_LOADED || this.node!.neighboursStatus === NeighboursStateType.LOADING_FAILED) {
                             this.handleNeighborsLoad();

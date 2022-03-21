@@ -133,7 +133,8 @@ export class GraphUpdateService {
         });
     }
 
-    positionNeighborNodes(centeredNodeId: string) {
+    positionNeighborNodes(centeredNodeId: string, visibleNodesBeforeExpand: INode[]) {
+        const visibleNodeIdsBeforeExpand = visibleNodesBeforeExpand.map(i => i.nodeId);
         const combinedGraphData$ = combineLatest([this.selectRootNodeId$, 
             this.selectGraphData$, 
             this.selectNodeTypes$,
@@ -161,7 +162,7 @@ export class GraphUpdateService {
     
                 [...centeredNode.sourceIds!, ...centeredNode.targetIds!].forEach(id => {
                     const n = allNodes.get(id);
-                    if(id && n) {
+                    if(id && n && visibleNodeIdsBeforeExpand.indexOf(id) < 0) {
                         delete n.x; delete n.fx; delete n.vx; 
                         delete n.y; delete n.fy; delete n.vy;
                         allDirectNeighbourNodes.set(id, n);
