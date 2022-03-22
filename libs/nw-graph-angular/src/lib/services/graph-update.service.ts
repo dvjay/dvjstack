@@ -124,11 +124,13 @@ export class GraphUpdateService {
 
         combinedGraphData$.pipe(take(1)).subscribe(([rootNodeId, allNodesData, nodeTypes, excludedNodeTypes, activeLayout]) => {
             const visibleNodeData = this.getVisibleNodes(rootNodeId as string, allNodesData as INwData, excludedNodeTypes as string[]);
-            const allNodes = (allNodesData as INwData).nodes;
-            const centeredNode = allNodes.get(rootNodeId as string);
-            if(allNodes && centeredNode) {
-                this.adapter!.attachNodesPositionByLayout(allNodesData as INwData, centeredNode, nodeTypes as string[], activeLayout as number, true);
-                this.graphEngineService.updateGraph(visibleNodeData);
+            if(allNodesData) {
+                const allNodes = (allNodesData as INwData).nodes;
+                const centeredNode = allNodes.get(rootNodeId as string);
+                if(allNodes && centeredNode) {
+                    this.adapter!.attachNodesPositionByLayout(allNodesData as INwData, centeredNode, nodeTypes as string[], activeLayout as number, true);
+                    this.graphEngineService.updateGraph(visibleNodeData);
+                }
             }
         });
     }
