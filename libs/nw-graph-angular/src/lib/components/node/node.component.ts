@@ -113,8 +113,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                     break; 
                 case NeighboursStateType.LOADING:
                     if(this.node!.collapsed) {
-                        // this.setCollapsedNodeLoadingStyle();
-                        this.setExpandedNodeLoadingStyle();
+                        this.setCollapsedNodeLoadingStyle();
                     } else {
                         this.setExpandedNodeLoadingStyle();
                     }
@@ -232,11 +231,6 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     }
 
     setCollapsedNodeLoadingStyle() {
-        this.nodeStyle = { stroke: NodeOutliningColors.NODE_COLLAPSED_AND_NEIGHBOURS_NOT_LOADED, strokeDasharray: 2 };
-    }
-
-    generateNeighborsPosition() {
-        const graphEngine = new GraphEngineService();
-
+        this.nodeStyle = { stroke: '#AA5555', strokeDasharray: 2 };
     }
 }
