@@ -196,7 +196,6 @@ export class GraphUpdateService {
     }
 
     selectDirectLinkedNodesAndEdges(rootNodeId: string, graphData: INwData) {
-        console.log("Check 3");
         const nodes = graphData ? graphData.nodes: new Map<string, INode>(); 
         const edges = graphData ? graphData.edges: new Map<string, IEdge>(); 
         const filteredNodes = new Map<string, INode>(); 
@@ -242,7 +241,6 @@ export class GraphUpdateService {
     }
 
     selectDirectLinkedFilterByNodeType(directLinked: INwData, excludeNodeTypes: string[]) {
-        console.log("Check 2");
         const nodes = directLinked.nodes; 
         const edges = directLinked.edges; 
         const filteredNodes = new Map<string, INode>(); 

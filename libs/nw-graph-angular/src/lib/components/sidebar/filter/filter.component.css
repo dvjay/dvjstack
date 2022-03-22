@@ -3,6 +3,14 @@
     height: 15px;
 }
 
+.mat-checkbox-checked ::ng-deep .mat-checkbox-background {
+    background-color: #7d7d7d;
+}
+
+.mat-checkbox-indeterminate ::ng-deep .mat-checkbox-background {
+    background-color: #7d7d7d;
+}
+
 .nw-filter-chk-row { 
     display: flex; 
     flex-direction: row; 

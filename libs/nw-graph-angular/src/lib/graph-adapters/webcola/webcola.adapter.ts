@@ -60,10 +60,10 @@ export default class WebcolaAdapter implements GraphAdapter {
             this.d3cola.stop();
         } else {
             if(nodes.length > 100) {
-                linkDistance = 220;
+                linkDistance = this.options.edgeLength;
             }
             if(nodes.length > 200) {
-                linkDistance = 350;
+                linkDistance = this.options.edgeLength + 100;
             }
             this.d3cola = cola.d3adaptor(d3)
                         .size([this.options.width, this.options.height])
