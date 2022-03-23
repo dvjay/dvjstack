@@ -129,7 +129,7 @@ export function graphReducer(state = initialState, action: Action): State {
                                         _node.neighboursStatus = NeighboursStateType.LOADED;
                                     }
                                 }
-                                layouts[i].nodes.set(key, {..._node});
+                                //layouts[i].nodes.set(key, {..._node});
                             }
                         }
                         else {

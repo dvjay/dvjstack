@@ -231,6 +231,6 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
     }
 
     setCollapsedNodeLoadingStyle() {
-        this.nodeStyle = { stroke: '#AA5555', strokeDasharray: 2 };
+        this.nodeStyle = { stroke: '#BF4040', strokeDasharray: 2 };
     }
 }
