@@ -13,7 +13,8 @@ export const config = {
     "nodeBorderWidth": 4,
     "nodeAlertIconSize": 17,
     "displayEdgeDirection": true,
-    "node": { "parentRawPath": ["data", "0", "printSet"],
+    "skewedFlagPath": ["data", "0", "IsSkewed"],
+    "node": { "parentRawPath": ["data", "1", "printSet"],
               "nodeIdAttributeKey": "v_id",
               "nodeTypeAttributeKey": "v_type",
               "nodeTitleAttributeKey": "label",
@@ -164,7 +165,7 @@ export const config = {
                                                   { "key": "isskewed", "displayName": "isskewed", "rawPath": ["attributes", "isskewed"], "tooltip": true },
                                                   { "key": "@visited", "displayName": "@visited", "rawPath": ["attributes", "@visited"], "tooltip": true } ]}
     ]},
-    "edge": { "parentRawPath": ["data", "1", "@@edgeSet"],
+    "edge": { "parentRawPath": ["data", "2", "@@edgeSet"],
               "edgeSourceIdAttribute": { "key": "from_id", "displayName": "Source Node Id", "rawPath": ["from_id"], "tooltip": true },
               "edgeTargetIdAttribute": { "key": "to_id", "displayName": "Target Node Id", "rawPath": ["to_id"], "tooltip": true },
               "edgeTitleAttribute": { "key": "e_type", "displayName": "Type", "rawPath": ["e_type"], "tooltip": true },
@@ -180,7 +181,18 @@ export const config = {
     },
     "alert": {
       "nodeAttributes": [{ "nodeType": "gfctCase", "attribute": "casetype", "condition": "typeof value === 'string' && (value.toUpperCase() === 'AML' || value.toUpperCase() === 'FRD')", "position": "NE", "message": "AML/FRD Alert", "color": "#fdee00"},
-                          { "nodeType": "gfctEntity", "attribute": "src", "condition": "typeof value === 'string' && value.toUpperCase() === 'DNDB'", "position": "N", "message": "DNDB Alert", "imagePath": "assets/images/itn.png", "color": "#ff0000"}]
+                          { "nodeType": "gfctEntity", "attribute": "src", "condition": "typeof value === 'string' && value.toUpperCase() === 'DNDB'", "position": "N", "message": "DNDB Alert", "imagePath": "assets/images/itn.png", "color": "#ff0000"},
+                          { "nodeType": "gfctEntity", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctParty", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctAccount", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctAddress", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctSSN", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctPhone", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctEmail", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctEin", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctITN", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctCase", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"},
+                          { "nodeType": "gfctSAR", "attribute": "isSkewed", "condition": "value === true", "position": "NW", "message": "Skewed Node. Double click to find connections", "color": "#ffe800"}]
     }
   }; 
   
@@ -188,6 +200,7 @@ export const data = {
   "status": "success",
   "timestamp": "2021-05-23",
   "data": [
+    {"IsSkewed": "TRUE"},
     {
       "printSet": [
         {
