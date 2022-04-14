@@ -117,7 +117,7 @@ export class NodeComponent implements OnChanges, OnInit, AfterViewInit, OnDestro
                     } else {
                         this.setExpandedNodeLoadingStyle();
                     }
-                    break;
+                    break; 
                 case NeighboursStateType.LOADING_FAILED:
                     this.nodeStyle = { stroke: NodeOutliningColors.NODE_LOADING_FAILED }; 
                     break; 

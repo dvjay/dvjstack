@@ -69,6 +69,11 @@ export class ConfigParserService {
             this.nwConfig.nodeBorderWidth = toPositiveInteger(this.nwRawConfig.nodeBorderWidth, defaultNwConfig.nodeBorderWidth);
             this.nwConfig.displayEdgeDirection = toBoolean(this.nwRawConfig.displayEdgeDirection, defaultNwConfig.displayEdgeDirection);
             this.nwConfig.nodeAlertIconSize = toPositiveInteger(this.nwRawConfig.nodeAlertIconSize, defaultNwConfig.nodeAlertIconSize); 
+            if(isArrayOfNonEmptyStrings(this.nwRawConfig.skewedFlagPath)) {
+                this.nwConfig.skewedFlagPath = this.nwRawConfig.skewedFlagPath;
+            } else {
+                console.error(`${ERROR_STR}Invalid skewedFlagPath`);
+            }
         }
     }
 

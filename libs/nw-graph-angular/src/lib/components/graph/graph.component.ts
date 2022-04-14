@@ -1,4 +1,4 @@
-import { ActionTypes, ExpandNodeContext, LoadExternalDeltaData } from './../../store/actions';
+import { ChangeNumHop, ExpandNodeContext, LoadExternalDeltaData } from './../../store/actions';
 import { EMPTY_STRING } from '../../utils';
 import { ChangeDetectionStrategy, 
           ChangeDetectorRef, 
@@ -17,7 +17,6 @@ import { ChangeDetectionStrategy,
           ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { State as GraphState } from '../../store/state';
-import { take } from 'rxjs/operators'; 
 import { ExpandNode, 
           CollapseNode, 
           ResetGraph, 
@@ -32,8 +31,9 @@ import { ExpandNode,
           UpdateNodeLoadingStatus} from '../../store/actions';
 import { DataBuilderService } from '../../services/data-builder.service';
 import { ConfigParserService } from '../../services/config-parser.service';
-import { IEdge, INode, INwData } from '../../models/nw-data';
+import { IEdge, INode, INwData, ServicePayload } from '../../models/nw-data';
 import { combineLatest, Observable, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { GraphEngineService } from '../../services/graph-engine.service';
 import * as graphSelectors from '../../store/selectors'; 
 import { Overlay } from '@angular/cdk/overlay';
@@ -49,6 +49,8 @@ const DEFAULT_MAX_NODES = 150;
 // const DEFAULT_NUM_HOPS = 2;
 const DEFAULT_WIDGET_HEIGHT = 720;
 const DEFAULT_WIDGET_WIDTH = 2000;
+
+type combineTuple = [Observable<string>, Observable<INwData>];
 
 @Component({
   selector: 'network-graph', 
@@ -170,27 +172,52 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
 
     if(data) {
       this.dataBuilderService.getNetworkData(this.data);
+      if(this.dataBuilderService.nwData.nodes.size < 1) {
+        console.log("Received external data with 0 nodes");
+        return;
+      }
       combineLatest([this.selectRootNodeId$, this.selectGraphData$]).pipe(take(1)).subscribe(([rootNodeIdFromStore, graphData]) => {
-        // this.graphUpdateService
-        if(rootNodeIdFromStore && this.rootNodeId !== rootNodeIdFromStore) { //Subset of graph
-          this.graphUpdateService.positionDeltaNodesFromData(this.rootNodeId, this.dataBuilderService.nwData);
-          this.store$.dispatch(new LoadExternalDeltaData({
-            rootNodeId: this.rootNodeId,
-            data: this.dataBuilderService.nwData, 
-            nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
-            maxNodeCount: this.maxNodes,
-            nodeCount: this.nodeCount
-          }));
+        this.graphUpdateService.positionDeltaNodesFromData(this.rootNodeId, this.dataBuilderService.nwData);
+        if(rootNodeIdFromStore) { //Subset of graph
+          if(this.rootNodeId !== rootNodeIdFromStore) {
+            this.store$.dispatch(new LoadExternalDeltaData({
+              rootNodeId: this.rootNodeId,
+              data: this.dataBuilderService.nwData, 
+              nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
+              maxNodeCount: this.maxNodes,
+              nodeCount: this.nodeCount,
+              isSkewed: this.dataBuilderService.isSkewed
+            }));
+          } else {
+            this.store$.dispatch(new LoadExternalData({
+              rootNodeId: this.rootNodeId,
+              data: this.dataBuilderService.nwData, 
+              nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
+              maxNodeCount: this.maxNodes,
+              nodeCount: this.nodeCount,
+              isSkewed: this.dataBuilderService.isSkewed
+            }));
+          }
         } else { // for root graph
           this.store$.dispatch(new LoadExternalData({
             rootNodeId: this.rootNodeId,
             data: this.dataBuilderService.nwData, 
             nodeTypes: Array.from(this.configParserService.nwNodeTypes.keys()),
             maxNodeCount: this.maxNodes,
-            nodeCount: this.nodeCount
+            nodeCount: this.nodeCount,
+            isSkewed: this.dataBuilderService.isSkewed
           }));
         }
-        this.dataUpdated.emit(graphData);
+        this.selectGraphData$.pipe(take(1)).subscribe((gData: INwData) => {
+          if(gData && gData.nodes) {
+            this.dataUpdated.emit(gData);
+          } else {
+            const ngData = {} as INwData;
+            ngData.nodes = new Map<string, INode>();
+            ngData.edges = new Map<string, IEdge>();
+            this.dataUpdated.emit(ngData);
+          }
+        });
       });
     }
   }
@@ -292,7 +319,11 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   }
 
   fetchNeighborNodes(node: INode) { 
-    this.nodeDoubleClicked.emit({nodeId: node.nodeId, nodeType: node.nodeType});
+    const servicePayload = {} as ServicePayload;
+    servicePayload.rootNodeId = node.nodeId;
+    servicePayload.rootNodeType = node.nodeType;
+    servicePayload.numHops = this.configParserService.nwConfig.numHops;
+    this.nodeDoubleClicked.emit(servicePayload);
     this.store$.dispatch(new UpdateNodeLoadingStatus(node.nodeId));
   }
   
@@ -312,7 +343,18 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     this.nodes = [];
     this.links = []; 
     this.ref.markForCheck();
-    this.store$.dispatch(new ResetGraph());
-    this.numHopChanged.emit(numHops);
+    combineLatest([this.selectRootNodeId$, this.selectGraphData$] as combineTuple).pipe(take(1)).subscribe(([rootNodeIdFromStore, graphData]) => {
+      this.store$.dispatch(new ChangeNumHop());
+      if(rootNodeIdFromStore && graphData && graphData.nodes) {
+        const rootNode = (graphData as INwData).nodes.get(rootNodeIdFromStore);
+        if(rootNode) {
+          const servicePayload = {} as ServicePayload;
+          servicePayload.rootNodeId = rootNode.nodeId;
+          servicePayload.rootNodeType = rootNode.nodeType;
+          servicePayload.numHops = numHops;
+          this.numHopChanged.emit(servicePayload);
+        }
+      }
+    });
   }
 }

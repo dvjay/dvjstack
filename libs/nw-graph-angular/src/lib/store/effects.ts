@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { State as GraphState, STORE_GRAPH_SLICE_NAME} from './state';
-import { ActionTypes, ExpandNode, ExpandNodeContext, ExternalDataPayload, LoadExternalDeltaData } from './actions';
+import { ActionTypes, CollapseNode, CollapseNodeContext, ExpandNode, ExpandNodeContext, ExternalDataPayload, LoadExternalDeltaData } from './actions';
 import { map, tap } from 'rxjs/operators';
 import { GraphUpdateService } from '../services/graph-update.service';
 
@@ -15,27 +15,33 @@ export class NetworkGraphEffects {
     @Effect({dispatch: false})
     PositionAllNodes$: Observable<Action> = this.actions$.pipe(
         ofType(ActionTypes.RESET_VISIBLE_NODES_POSITIONS, 
-                ActionTypes.CHANGE_ACTIVE_LAYOUT),
+                ActionTypes.CHANGE_ACTIVE_LAYOUT,
+                ActionTypes.COLLAPSE_ALL_NODES),
         tap(() => {
             this.graphUpdateService.positionVisibleNodes();
         }));
 
     @Effect({dispatch: false})
     tickVisibleNodes$: Observable<Action> = this.actions$.pipe(
-        ofType(ActionTypes.COLLAPSE_NODE,
-                ActionTypes.COLLAPSE_ALL_NODES,
-                ActionTypes.EXCLUDE_NODE_TYPES,
-                ActionTypes.EXPAND_ALL_NODES,
+        ofType( ActionTypes.EXPAND_ALL_NODES,
+                ActionTypes.CHANGE_NUM_HOP,
                 ActionTypes.LOAD_EXTERNAL_DELTA_DATA),
         tap(() => {
             this.graphUpdateService.tickGraph();
         }));
 
     @Effect({dispatch: false})
+    tickVisibleNodesAfterFilter$: Observable<Action> = this.actions$.pipe(
+        ofType( ActionTypes.EXCLUDE_NODE_TYPES),
+        tap(() => {
+            this.graphUpdateService.tickGraphAfterFilter();
+        }));
+
+    @Effect({dispatch: false})
     loadOriginalRootNode$: Observable<Action> = this.actions$.pipe(
         ofType(ActionTypes.LOAD_EXTERNAL_DATA),
         tap(() => {
-            this.graphUpdateService.positionAllNodes();
+            this.graphUpdateService.positionVisibleNodes();
         }));
 
     @Effect({dispatch: false})
@@ -44,6 +50,13 @@ export class NetworkGraphEffects {
         map((action: ExpandNode) => action.payload),
         tap((payload) => {
             this.graphUpdateService.positionNeighborNodes(payload.rootNodeId, payload.currentVisibleNodes);
+        }));
+    @Effect({dispatch: false})
+    tickVisibleNodesForCollapse$: Observable<CollapseNodeContext> = this.actions$.pipe(
+        ofType(ActionTypes.COLLAPSE_NODE),
+        map((action: CollapseNode) => action.payload),
+        tap((payload) => {
+            this.graphUpdateService.tickGraph(payload.nodeId);
         }));
     
 }

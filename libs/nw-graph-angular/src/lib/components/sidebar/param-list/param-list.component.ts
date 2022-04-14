@@ -2,7 +2,7 @@ import { LayoutChangeMessage } from './../../../services/notification-broker.ser
 import { Component, OnInit, OnDestroy } from '@angular/core'; 
 import { Store } from '@ngrx/store'; 
 import { Observable, Subscription } from 'rxjs'; 
-import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../../store/state'; 
+import { State as GraphState } from '../../../store/state'; 
 import * as graphSelectors from '../../../store/selectors'; 
 import { ConfigParserService } from '../../../services/config-parser.service'; 
 import { INwData } from '../../../models/nw-data';

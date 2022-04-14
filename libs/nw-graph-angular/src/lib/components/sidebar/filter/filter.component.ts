@@ -30,7 +30,8 @@ export class FilterComponent implements OnInit, OnDestroy {
     allComplete: boolean = true; 
     excludedNodeTypes: string[] = []; 
     notificationUpdatedSub: Subscription | undefined; 
-    graphDataSub: Subscription | undefined; 
+    graphDataSub: Subscription | undefined;
+    grapActiveLayoutSub: Subscription | undefined;
     disableFilters = true;
     
     constructor(private store$: Store<GraphState>, private configParserService: ConfigParserService, private graphUpdateService: GraphUpdateService) {
@@ -43,10 +44,13 @@ export class FilterComponent implements OnInit, OnDestroy {
         }); 
         this.graphDataSub = this.store$.select(graphSelectors.selectGraphData).subscribe((graphData) => {
             this.disableFilters = graphData && graphData.nodes.size > 0? false : true;
-        }); 
+        });
+        this.grapActiveLayoutSub = this.store$.select(graphSelectors.selectActiveLayout).subscribe((activeLayout) => {
+            this.disableFilters = activeLayout > 0;
+        });
         this.notificationUpdatedSub = this.configParserService.notificationUpdated$.subscribe(() => {
             this.loadNodeTypes(this.excludedNodeTypes);
-        })
+        });
     }
     
     ngOnDestroy() {
@@ -55,6 +59,9 @@ export class FilterComponent implements OnInit, OnDestroy {
         }
         if(this.graphDataSub) {
             this.graphDataSub.unsubscribe();
+        }
+        if(this.grapActiveLayoutSub) {
+            this.grapActiveLayoutSub.unsubscribe();
         }
     }
 

@@ -9,6 +9,7 @@ const ERROR_STR = "data-builder Error: ";
 
 @Injectable()
 export class DataBuilderService {
+    public isSkewed = false;
     public nwData: INwData = {
         nodes: new Map<NodeId, INode>(),
         edges: new Map<EdgeId, IEdge>()
@@ -26,6 +27,8 @@ export class DataBuilderService {
             this.nwConfigParser.nwConfig.node && 
             this.nwConfigParser.nwConfig.edge
         ) {
+            let isSkewed = lodashGet(rawData, this.nwConfigParser.nwConfig.skewedFlagPath, false);
+            this.isSkewed = typeof isSkewed === 'string' && isSkewed.toLowerCase().trim() === 'true';
             const nodeCollection = lodashGet(rawData, this.nwConfigParser.nwConfig.node.parentRawPath, null);
             const edgeCollection = lodashGet(rawData, this.nwConfigParser.nwConfig.edge.parentRawPath, null); 
             // Node 

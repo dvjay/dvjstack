@@ -12,6 +12,7 @@ export const defaultNwConfig: Readonly<NwConfig> = Object.freeze({
     nodeBorderWidth: 4,
     displayEdgeDirection: false,
     nodeAlertIconSize: 12,
+    skewedFlagPath: [],
     node: null, 
     edge: null,
     alert: null
@@ -56,6 +57,7 @@ export interface NwConfig {
     nodeBorderWidth: number;
     displayEdgeDirection: boolean;
     nodeAlertIconSize: number;
+    skewedFlagPath: string[];
     node: NwNode | null; 
     edge: NwEdge | null;
     alert: NwAlert | null;

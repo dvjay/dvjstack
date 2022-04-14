@@ -11,6 +11,7 @@ export enum ActionTypes {
     TOGGLE_LABEL = '[NW]TOGGLE_LABEL',
     COLLAPSE_NODE = '[NW]COLLAPSE_NODE',
     RESET_GRAPH = '[NW]RESET_GRAPH',
+    CHANGE_NUM_HOP = '[NW]CHANGE_NUM_HOP',
     RESET_VISIBLE_NODES_POSITIONS = '[NW]RESET_VISIBLE_NODES_POSITIONS',
     LOAD_EXTERNAL_DATA = '[NW]LOAD_EXTERNAL_DATA',
     LOAD_EXTERNAL_DELTA_DATA = '[NW]LOAD_EXTERNAL_DELTA_DATA',
@@ -30,6 +31,7 @@ export interface ExternalDataPayload {
     nodeTypes: string[],
     maxNodeCount: number; 
     nodeCount: number;
+    isSkewed?: boolean;
 }
 
 export interface ChangeLayoutPayload { 
@@ -46,6 +48,12 @@ export interface ResetVisibleNodesPayload {
 export interface ExpandNodeContext { 
     rootNodeId: string;
     currentVisibleNodes: INode[];
+}
+
+export interface CollapseNodeContext { 
+    nodeId: string; 
+    currentVisibleNodes: INode[]; 
+    currentVisibleEdges: IEdge[];
 }
 
 export class ExcludeNodeTypes implements Action {
@@ -74,10 +82,13 @@ export class UnselectAllNodes implements Action {
 }
 export class CollapseNode implements Action {
     public readonly type = ActionTypes.COLLAPSE_NODE; 
-    constructor(public payload: { nodeId: string; currentVisibleNodes: INode[]; currentVisibleEdges: IEdge[];}) {}
+    constructor(public payload: CollapseNodeContext) {}
 }
 export class ResetGraph implements Action {
     public readonly type = ActionTypes.RESET_GRAPH;
+}
+export class ChangeNumHop implements Action {
+    public readonly type = ActionTypes.CHANGE_NUM_HOP;
 }
 export class ToggleLabel implements Action {
     public readonly type = ActionTypes.TOGGLE_LABEL;
@@ -117,7 +128,8 @@ export type Actions = ExcludeNodeTypes
                         | ExpandNode 
                         | ToggleLabel
                         | CollapseNode
-                        | ResetGraph 
+                        | ResetGraph
+                        | ChangeNumHop
                         | SelectNode
                         | SelectOnlyClickedNode 
                         | UnselectAllNodes 

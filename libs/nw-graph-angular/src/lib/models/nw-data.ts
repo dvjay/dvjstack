@@ -1,12 +1,10 @@
-import { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force'; 
-
-// import { SimulationLinkDatum, SimulationNodeDatum } from "d3";
+import { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force';
 
 export enum NeighboursStateType {
     NOT_LOADED,
     LOADED,
     LOADING,
-    LOADING_FAILED
+    LOADING_FAILED,
 }
 
 export interface INode extends SimulationNodeDatum {
@@ -32,6 +30,7 @@ export interface INode extends SimulationNodeDatum {
     selected: boolean;
     highlighted: boolean;
     isRootNode: boolean;
+    isSkewed?: string;// Has to be string for node Alert
 }
 
 export type NodeId = INode['id']; 
@@ -71,8 +70,6 @@ export interface IEdge extends SimulationLinkDatum<SimulationNodeDatum> {
     id: string; 
     source: {x?: number, y?: number, fx?: number, fy?: number, vx?: number, vy?: number} | string; 
     target: {x?: number, y?: number, fx?: number, fy?: number, vx?: number, vy?: number} | string;
-    // sourceNodeId: string; 
-    // targetNodeId: string; 
     title?: string; 
     [key: string]: any;
     // Hack 
@@ -81,6 +78,14 @@ export interface IEdge extends SimulationLinkDatum<SimulationNodeDatum> {
     linkId: string; 
     name: string;
     layoutId: number;
+}
+
+export interface ServicePayload {
+    rootNodeId: string;
+    rootNodeType: string;
+    numHops: number;
+    data?: any;
+    success: boolean;
 }
 
 export type EdgeId = IEdge['id'];

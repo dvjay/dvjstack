@@ -134,7 +134,6 @@ export const Primary = () => ({
     rootNodeId: text('rootNodeId', nwRootNodeId),
     dataLoading: nwDataLoading,
     config: nwConfig,
-    // data: object('data', {}),
     data: object('data', {...nwData}),
     nodeCount: 0,
     numHopChanged: actionsData.numHopChanged,

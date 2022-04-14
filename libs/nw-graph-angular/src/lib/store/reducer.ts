@@ -1,4 +1,4 @@
-import { ActionTypes, ChangeActiveLayout, CollapseNode, ExcludeNodeTypes, ExpandNode, ExpandNodeContext, ExpandOnlyRootNode, LoadExternalData, ResetVisibleNodesPositions, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
+import { ActionTypes, ChangeActiveLayout, CollapseNode, CollapseNodeContext, ExcludeNodeTypes, ExpandNode, ExpandNodeContext, ExpandOnlyRootNode, LoadExternalData, ResetVisibleNodesPositions, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
 import { initialState, State } from './state';
 import { Action } from '@ngrx/store';
 import { identifyFullyLoadedNodesByNumHops, nwToString } from '../utils';
@@ -13,9 +13,16 @@ export function graphReducer(state = initialState, action: Action): State {
                 hideLabel: !state.hideLabel 
             };
         }
-        case ActionTypes.RESET_GRAPH: { 
+        case ActionTypes.RESET_GRAPH: {
             return {
                 ...initialState
+            };
+        }
+        case ActionTypes.CHANGE_NUM_HOP: {
+            return {
+                ...initialState,
+                excludedNodeTypes: state.excludedNodeTypes,
+                rootNodeId: state.rootNodeId
             };
         }
         case ActionTypes.EXCLUDE_NODE_TYPES: { 
@@ -26,7 +33,7 @@ export function graphReducer(state = initialState, action: Action): State {
             };
         }
         case ActionTypes.COLLAPSE_NODE : {
-            const payload = (action as CollapseNode).payload;
+            const payload = (action as CollapseNode).payload as CollapseNodeContext;
             const colNodeId = payload.nodeId;
             const layouts = state.layouts.map(item => {
                 return {...item};
@@ -93,10 +100,10 @@ export function graphReducer(state = initialState, action: Action): State {
             let rootNodeIdForDelta = nwToString(payload.rootNodeId);
             const payloadData = payload.data;
             const maxNodeCount = payload.maxNodeCount;
-            const nodeCount = parseInt(payload.nodeCount.toString());
+            // const nodeCount = parseInt(payload.nodeCount.toString());
             const activeLayout = state.activeLayout;
-            const graphData = state.data;
             let maxNodeCountExceeded = false;
+            const isSkewed = payload.isSkewed;
 
             let layouts = state.layouts;
             let hasLayoutLoaded = state.hasLayoutLoaded;
@@ -129,11 +136,16 @@ export function graphReducer(state = initialState, action: Action): State {
                                         _node.neighboursStatus = NeighboursStateType.LOADED;
                                     }
                                 }
-                                //layouts[i].nodes.set(key, {..._node});
                             }
                         }
                         else {
                             const newNode = lodashCloneDeep(value);
+                            if(isSkewed === true && !newNode.neighboursLoaded === true) {
+                                newNode.neighboursLoaded = true;
+                                newNode.neighboursLoading = false;
+                                newNode.neighboursStatus = NeighboursStateType.LOADED;
+                                newNode.isSkewed = 'true';
+                            }
                             newNode.collapsed = true;
                             layouts[i].nodes.set(key, newNode);
                         }
@@ -152,6 +164,11 @@ export function graphReducer(state = initialState, action: Action): State {
                         }
                     }
                 }
+            }
+
+            if(layouts && layouts[activeLayout] && layouts[activeLayout].nodes) {
+                const cnt = layouts[activeLayout].nodes.size;
+                maxNodeCountExceeded = cnt > maxNodeCount;
             }
 
             return {
@@ -177,23 +194,17 @@ export function graphReducer(state = initialState, action: Action): State {
             const activeLayout = state.activeLayout;
             const graphData = state.data;
             let maxNodeCountExceeded = false;
+            const isSkewed = payload.isSkewed;
 
             let layouts = state.layouts;
             let hasLayoutLoaded = state.hasLayoutLoaded;
             let layoutTransform = state.layoutTransform;
             const stateData = state.data;
 
-            /*
-            if(typeof nodeCount === 'number' && nodeCount > 0) {
-                maxNodeCountExceeded = nodeCount > maxNodeCount;
-            } else {
-                maxNodeCountExceeded = payloadData.nodes.size > maxNodeCount;
-            }
-            */
-
             const cRootNode = payloadData.nodes.get(rootNodeId);
             if(cRootNode) {
                 cRootNode.isRootNode = true;
+                cRootNode.collapsed = false;
             } else {
                 console.info("Root Node is absent.")
                 return state;
@@ -212,13 +223,26 @@ export function graphReducer(state = initialState, action: Action): State {
                 const clonedEdges = new Map<EdgeId, IEdge>();
             
                 for (const [key, value] of payloadData.nodes) {
-                    clonedNodes.set(key,  lodashCloneDeep(value));
+                    const clondedNode = lodashCloneDeep(value);
+                    if(isSkewed === true && !clondedNode.neighboursLoaded === true) {
+                        clondedNode.neighboursLoaded = true;
+                        clondedNode.neighboursLoading = false;
+                        clondedNode.neighboursStatus = NeighboursStateType.LOADED;
+                        clondedNode.isSkewed = 'true';
+                    }
+                    clonedNodes.set(key, clondedNode);
                 }
             
                 for (const [key, value] of payloadData.edges) {
                     clonedEdges.set(key, lodashCloneDeep(value));
                 }
                 layouts[i] = {nodes: clonedNodes, edges: clonedEdges};
+            }
+
+            if(typeof nodeCount === 'number' && nodeCount > 0) {
+                maxNodeCountExceeded = nodeCount > maxNodeCount;
+            } else {
+                maxNodeCountExceeded = payloadData.nodes.size > maxNodeCount;
             }
 
             return {
@@ -335,7 +359,18 @@ export function graphReducer(state = initialState, action: Action): State {
             };
         }
         case ActionTypes.RESET_VISIBLE_NODES_POSITIONS: {
-            return {...state};
+            const rootNodeId = state.rootNodeId;
+            const excludedNodeTypes = state.excludedNodeTypes;
+            const graphData = state.data;
+            if(typeof rootNodeId === 'string' && rootNodeId.length > 0 && graphData) {
+                const nodes = graphData.nodes;
+                const rootNode = nodes.get(rootNodeId);
+                if(rootNode && rootNode.nodeType && excludedNodeTypes.indexOf(rootNode.nodeType) > -1) {
+                    const index = excludedNodeTypes.indexOf(rootNode.nodeType);
+                    excludedNodeTypes.splice(index, 1);
+                }
+            }
+            return {...state, excludedNodeTypes};
         }
         case ActionTypes.SELECT_NODE: {
             const nodeId = (action as SelectNode).payload;
