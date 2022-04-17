@@ -1,10 +1,10 @@
 import { ActionTypes, ChangeActiveLayout, CollapseNode, CollapseNodeContext, ExcludeNodeTypes, ExpandNode, 
         ExpandNodeContext, LoadExternalData, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
-import { getInitialState, State } from './state';
+import { getInitialLayoutData, getInitialState, State } from './state';
 import { Action } from '@ngrx/store';
 import { identifyFullyLoadedNodesByNumHops, nwToString } from '../utils';
 import {cloneDeep as lodashCloneDeep, union as lodashUnion } from "lodash";
-import { EdgeId, IEdge, INode, NeighboursStateType, NodeId } from '../models/nw-data';
+import { EdgeId, IEdge, INode, INwData, NeighboursStateType, NodeId } from '../models/nw-data';
 
 export function graphReducer(state = getInitialState(), action: Action): State {
     switch(action.type) { 
@@ -41,35 +41,29 @@ export function graphReducer(state = getInitialState(), action: Action): State {
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
-            const data = state.data;
-
-            if(data) {
-                for(let i=0; i<layouts.length; i++) {
-                    const node = layouts[i].nodes.get(colNodeId);
-                    if(node) {
-                        node.collapsed = true;
-                    }
+            for(let i=0; i<layouts.length; i++) {
+                const node = layouts[i].nodes.get(colNodeId);
+                if(node) {
+                    node.collapsed = true;
                 }
             }
 
             return {
                 ...state,
-                layouts: layouts,
-                data: layouts[state.activeLayout]
+                layouts: layouts
             };
         }
         case ActionTypes.EXPAND_NODE: {
             const payload = (action as ExpandNode).payload as ExpandNodeContext;
             const currentVisibleNodes = payload.currentVisibleNodes;
             const colNodeId = payload.rootNodeId;
-            const data = state.data;
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
             const currentVisibleNodeIds = currentVisibleNodes.map(item => {
                 return item.nodeId;
             });
-            
+            const data = getGraphDataFromGraphState(state);
 
             if(data) {
                 for(let i=0; i<layouts.length; i++) {
@@ -94,8 +88,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
 
             return {
                 ...state,
-                layouts: layouts,
-                data: layouts[state.activeLayout]
+                layouts: layouts
             };
         }
         case ActionTypes.LOAD_EXTERNAL_DELTA_DATA: {
@@ -110,7 +103,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
             let layouts = state.layouts;
             let hasLayoutLoaded = state.hasLayoutLoaded;
             let layoutTransform = state.layoutTransform;
-            const stateData = state.data;
+            const stateData = getGraphDataFromGraphState(state);
 
             layouts = layouts.map((lyt) => ({...lyt}));
             const newEdgeIds = new Set<string>();
@@ -175,7 +168,6 @@ export function graphReducer(state = getInitialState(), action: Action): State {
 
             return {
                 ...state,
-                data: layouts[activeLayout],
                 nodeTypes: payload.nodeTypes,
                 layouts: layouts,
                 layoutTransform,
@@ -205,9 +197,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
                 console.info("Root Node is absent.")
                 return state;
             }
-            layouts = [{ nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-                                { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-                                { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}];
+            layouts = [getInitialLayoutData(), getInitialLayoutData(), getInitialLayoutData()];
             hasLayoutLoaded = [false, false, false];
             layoutTransform = [{x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}];
             if(activeLayout === 0) {
@@ -243,8 +233,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
 
             return {
                 ...state,
-                rootNodeId: rootNodeId, 
-                data: layouts[activeLayout],
+                rootNodeId: rootNodeId,
                 nodeTypes: payload.nodeTypes,
                 layouts: layouts,
                 layoutTransform,
@@ -268,17 +257,15 @@ export function graphReducer(state = getInitialState(), action: Action): State {
             layouts[activeLayoutId] = activeLayout;
 
             return {
-                ...state, 
-                data: layouts[activeLayoutId], 
-                layouts: layouts,
-                // enableRender: enableRender
+                ...state,
+                layouts: layouts
             };
         }
         case ActionTypes.EXPAND_ALL_NODES: {
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
-            const data = state.data;
+            const data = getGraphDataFromGraphState(state);
 
             if(state.rootNodeId && data) {
                 const loadedNodes = identifyFullyLoadedNodesByNumHops(state.rootNodeId, data, 2);
@@ -294,15 +281,14 @@ export function graphReducer(state = getInitialState(), action: Action): State {
 
             return {
                 ...state,
-                layouts: layouts,
-                data: layouts[state.activeLayout]
+                layouts: layouts
             };
         }
         case ActionTypes.COLLAPSE_ALL_NODES: {
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
-            const data = state.data;
+            const data = getGraphDataFromGraphState(state);
 
             if(data) {
                 for(let [key, _] of data.nodes) {
@@ -321,15 +307,14 @@ export function graphReducer(state = getInitialState(), action: Action): State {
 
             return {
                 ...state,
-                layouts: layouts,
-                data: layouts[state.activeLayout]
+                layouts: layouts
             };
         }
         case ActionTypes.COLLAPSE_LEAF_NODES: {
             const layouts = state.layouts.map(item => {
                 return {...item};
             });
-            const data = state.data;
+            const data = getGraphDataFromGraphState(state);
 
             if(data) {
                 for(let [_, value] of data.nodes) {
@@ -347,14 +332,13 @@ export function graphReducer(state = getInitialState(), action: Action): State {
 
             return {
                 ...state,
-                layouts: layouts,
-                data: layouts[state.activeLayout]
+                layouts: layouts
             };
         }
         case ActionTypes.RESET_VISIBLE_NODES_POSITIONS: {
             const rootNodeId = state.rootNodeId;
             const excludedNodeTypes = state.excludedNodeTypes;
-            const graphData = state.data;
+            const graphData = getGraphDataFromGraphState(state);
             if(typeof rootNodeId === 'string' && rootNodeId.length > 0 && graphData) {
                 const nodes = graphData.nodes;
                 const rootNode = nodes.get(rootNodeId);
@@ -401,11 +385,10 @@ export function graphReducer(state = getInitialState(), action: Action): State {
         case ActionTypes.UPDATE_NODE_LOADING_STATUS: {
             const nodeId = (action as UpdateNodeLoadingStatus).payload;
             let layouts = state.layouts;
+            let data = getGraphDataFromGraphState(state);
 
-            if(nodeId && state.data && state.data.nodes.has(nodeId)) { 
-                layouts = [{ nodes: new Map<NodeId, INode>(layouts[0].nodes), edges: new Map<EdgeId, IEdge>(layouts[0].edges)}, 
-                            { nodes: new Map<NodeId, INode>(layouts[1].nodes), edges: new Map<EdgeId, IEdge>(layouts[1].edges)}, 
-                            { nodes: new Map<NodeId, INode>(layouts[2].nodes), edges: new Map<EdgeId, IEdge>(layouts[2].edges)}];
+            if(nodeId && data && data.nodes.has(nodeId)) { 
+                layouts = lodashCloneDeep(layouts);
 
                 for(let i=0; i<layouts.length; i++) {
                     const _node = layouts[i].nodes.get(nodeId);
@@ -416,8 +399,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
                     }
                 }
                 return {
-                    ... state, 
-                    data: layouts[state.activeLayout],
+                    ... state,
                     layouts: layouts
                 };
             } else {
@@ -450,8 +432,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
                 ...state,
                 activeLayout: newActiveLayout,
                 layoutTransform: newLayoutTransform,
-                hasLayoutLoaded: newHasLayoutLoaded,
-                data: state.layouts[newActiveLayout]
+                hasLayoutLoaded: newHasLayoutLoaded
             };
         }
         case ActionTypes.UNSELECT_ALL_NODES: { 
@@ -464,5 +445,13 @@ export function graphReducer(state = getInitialState(), action: Action): State {
         default: {
             return state;
         }
+    }
+}
+
+function getGraphDataFromGraphState(gState: State): INwData | null {
+    if(gState && Array.isArray(gState.layouts) && gState.activeLayout) {
+        return gState.layouts[gState.activeLayout];
+    } else {
+        return null;
     }
 }

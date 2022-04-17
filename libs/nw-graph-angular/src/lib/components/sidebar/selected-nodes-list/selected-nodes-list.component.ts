@@ -1,9 +1,10 @@
+import { INwData } from './../../../models/nw-data';
 import { Component, OnInit } from "@angular/core";
 import { INode } from "../../../models/nw-data";
 import { Store } from '@ngrx/store';
-import { State as GraphState, STORE_GRAPH_SLICE_NAME } from '../../../store/state';
-import { take, debounceTime } from 'rxjs/operators';
+import { State as GraphState } from '../../../store/state';
 import * as graphSelectors from '../../../store/selectors';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 
 @Component({
     selector: 'selected-nodes-list',
@@ -12,8 +13,10 @@ import * as graphSelectors from '../../../store/selectors';
 })
 export class SelectedNodesListComponent implements OnInit {
     selectedNodes: (INode | undefined)[] = [];
+    selectGraphData$: Observable<INwData | null> | undefined;
+    selectSelectedNodeIds$: Observable<string[]> | undefined;
+    combinedGraphDataSub: Subscription | undefined;
     
-    // constructor (private store$: Store<Graphstate>, private notificationBrokerservice: NotificationBrokerservice) {
     constructor (private store$: Store<GraphState>) {
     }
     
@@ -30,28 +33,24 @@ export class SelectedNodesListComponent implements OnInit {
     // }
     
     ngOnInit() {
-        this.store$.select(graphSelectors.selectGraphData).pipe(debounceTime(1000)).subscribe(
-            () => {
-                this.getCurrentSelectedNodeFromStore();
-            });
-        this.store$.select(graphSelectors.selectSelectedNodeIds).subscribe(
-            () => {
-                this.getCurrentSelectedNodeFromStore(); 
-        });
-    }
-    
-    getCurrentSelectedNodeFromStore() {
-        this.store$.pipe(take(1)).subscribe((val: {[key: string]: any}) => {
-            let graphState = val[STORE_GRAPH_SLICE_NAME] as GraphState;
-            const selectedNodeIds = graphState.selectedNodeIds;
-            if(graphState && graphState.data) {
-                const nodes = graphState.data.nodes;
+        this.selectGraphData$ = this.store$.select(graphSelectors.selectGraphData);
+        this.selectSelectedNodeIds$ = this.store$.select(graphSelectors.selectSelectedNodeIds);
+        const combinedGraphData$ = combineLatest([this.selectGraphData$, this.selectSelectedNodeIds$]);
+
+        this.combinedGraphDataSub = combinedGraphData$.subscribe(([graphData, selectedNodeIds]) => {
+            if(graphData) {
                 this.selectedNodes = selectedNodeIds.map((id) => {
-                    return nodes.get(id);
+                    return graphData.nodes.get(id);
                 });
             } else {
                 this.selectedNodes = [];
             }
         });
+    }
+
+    ngOnDestroy() {
+        if(this.combinedGraphDataSub) {
+            this.combinedGraphDataSub.unsubscribe();
+        }
     }
 }

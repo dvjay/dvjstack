@@ -5,7 +5,7 @@ import {cloneDeep as lodashCloneDeep } from "lodash";
 // State for graph 
 export const STORE_GRAPH_SLICE_NAME = "nwGraph";
 export interface State {
-    data: INwData | null;
+    // data: INwData | null;
     nodeTypes: string[];
     rootNodeId: string | undefined;
     selectedNodeIds: string[];
@@ -38,7 +38,6 @@ export function getInitialState(): State {
     const circularLayoutData = getInitialLayoutData();
     const circularLayoutTransform = getInitialLayoutTransform();
     const circularLayout: ILayout = { 
-        id: 0,
         name: "circular",
         displayName: "Circular",
         data: circularLayoutData,
@@ -50,7 +49,6 @@ export function getInitialState(): State {
     const forcedLayoutData = getInitialLayoutData();
     const forcedLayoutTransform = getInitialLayoutTransform();
     const forcedLayout: ILayout = { 
-        id: 1,
         name: "forced",
         displayName: "Forced",
         data: forcedLayoutData,
@@ -61,8 +59,7 @@ export function getInitialState(): State {
     // hierarchical layout
     const hierarchicalLayoutData = getInitialLayoutData();
     const hierarchicalLayoutTransform = getInitialLayoutTransform();
-    const hierarchicalLayout: ILayout = { 
-        id: 2,
+    const hierarchicalLayout: ILayout = {
         name: "hierarchical",
         displayName: "Hierarchical",
         data: hierarchicalLayoutData,
@@ -73,8 +70,7 @@ export function getInitialState(): State {
        // hierarchical layout
     const gridLayoutData = getInitialLayoutData();
     const gridLayoutTransform = getInitialLayoutTransform();
-    const gridLayout: ILayout = { 
-        id: 3,
+    const gridLayout: ILayout = {
         name: "grid",
         displayName: "Grid",
         data: gridLayoutData,
@@ -84,7 +80,7 @@ export function getInitialState(): State {
     };
 
     return {
-        data: null,
+        // data: null,
         nodeTypes: [],
         selectedNodeIds: [],
         highlightedNodeIds: [],

@@ -82,7 +82,6 @@ export interface IEdge extends SimulationLinkDatum<SimulationNodeDatum> {
 }
 
 export interface ILayout {
-    id: number;
     name: string;
     displayName: string;
     data: INwData;

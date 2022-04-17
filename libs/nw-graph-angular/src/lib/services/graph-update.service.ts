@@ -5,7 +5,6 @@ import { INode, IEdge, INwData } from '../models/nw-data';
 import { GraphEngineService } from './graph-engine.service';
 import { State as GraphState } from '../store/state';
 import * as graphSelectors from '../store/selectors';
-import { CollapseAllNodes, ExcludeNodeTypes, ExpandAllNodes } from '../store/actions';
 import { combineLatest } from 'rxjs';
 import { DEFAULT_GRAPH_OPTIONS, GraphAdapter, GraphOptions } from '../models/graph-adapter';
 import WebcolaAdapter from '../graph-adapters/webcola/webcola.adapter';

@@ -8,7 +8,23 @@ export const getNetworkGraphState: MemoizedSelector<object, GraphState> = create
 
 export const selectGraphData: MemoizedSelector<object, INwData | null> = createSelector(
     getNetworkGraphState, 
-    state => state.data
+    state => {
+        if(Array.isArray(state.layouts) && state.layouts[state.activeLayout]) {
+            return state.layouts[state.activeLayout];
+        } else {
+            return null;
+        }
+    }
+);
+export const selectGraphData2: MemoizedSelector<object, INwData | null> = createSelector(
+    getNetworkGraphState, 
+    state => {
+        if(Array.isArray(state.layouts2) && state.layouts[state.activeLayout]) {
+            return state.layouts2[state.activeLayout].data;
+        } else {
+            return null;
+        }
+    }
 );
 export const selectIsHideLabel: MemoizedSelector<object, boolean> = createSelector(
     getNetworkGraphState, 
