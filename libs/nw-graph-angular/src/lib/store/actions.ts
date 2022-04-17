@@ -121,9 +121,7 @@ export class ChangeActiveLayout implements Action {
     public readonly type = ActionTypes.CHANGE_ACTIVE_LAYOUT;
     constructor(public payload: ChangeLayoutPayload) {}
 }
-// export class ToggleRender implements Action {
-//     public readonly type = ActionTypes.TOGGLE_RENDER;
-// }
+
 export type Actions = ExcludeNodeTypes
                         | ExpandNode 
                         | ToggleLabel

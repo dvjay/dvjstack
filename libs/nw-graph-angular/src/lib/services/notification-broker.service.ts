@@ -6,10 +6,13 @@ export class NotificationBrokerService {
     private notificationMoveOverSource = new Subject<NotificationMessage>(); 
     private notificationMoveOutsource = new Subject<NotificationMessage>();
     private notificationLayoutChange = new Subject<LayoutChangeMessage>();
+    private notificationDisplayedNodesChange = new Subject<void>();
     
     notificationMoveOver$: Observable<NotificationMessage> = this.notificationMoveOverSource.asObservable(); 
     notificationMoveOut$: Observable<NotificationMessage> = this.notificationMoveOutsource.asObservable();
     notificationLayoutChange$: Observable<LayoutChangeMessage> = this.notificationLayoutChange.asObservable();
+    notificationDisplayedNodesChange$: Observable<void> = this.notificationDisplayedNodesChange.asObservable();
+
     notificationMouseover(message: NotificationMessage) {
         this.notificationMoveOverSource.next(message);
     }
@@ -18,6 +21,9 @@ export class NotificationBrokerService {
     }
     OnLayoutChange(message: LayoutChangeMessage) {
         this.notificationLayoutChange.next(message);
+    }
+    OnDisplayedNodesChange() {
+        this.notificationDisplayedNodesChange.next();
     }
 }
 

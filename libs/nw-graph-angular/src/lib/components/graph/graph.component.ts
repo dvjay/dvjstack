@@ -18,15 +18,13 @@ import { ChangeDetectionStrategy,
 import { Store } from '@ngrx/store';
 import { State as GraphState } from '../../store/state';
 import { ExpandNode, 
-          CollapseNode, 
-          ResetGraph, 
+          CollapseNode,
           ToggleLabel, 
           SelectNode,
           UnselectAllNodes, 
           SelectOnlyClickedNode,
           ResetVisibleNodesPositions, 
-          LoadExternalData, 
-          ExpandOnlyRootNode, 
+          LoadExternalData,
           ChangeActiveLayout,
           UpdateNodeLoadingStatus} from '../../store/actions';
 import { DataBuilderService } from '../../services/data-builder.service';
@@ -43,7 +41,7 @@ import { LayoutChangeMessage, NotificationBrokerService } from '../../services/n
 import { zoomTransform} from 'd3-zoom';
 import { TransformInfo } from '../../models/load-nodes-payload';
 import { GraphUpdateService } from '../../services/graph-update.service';
-import { Actions, ofType } from '@ngrx/effects';
+import { Actions } from '@ngrx/effects';
 
 const DEFAULT_MAX_NODES = 150;
 // const DEFAULT_NUM_HOPS = 2;

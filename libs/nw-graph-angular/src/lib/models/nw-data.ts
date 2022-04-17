@@ -1,4 +1,5 @@
 import { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force';
+import { TransformInfo } from './load-nodes-payload';
 
 export enum NeighboursStateType {
     NOT_LOADED,
@@ -78,6 +79,16 @@ export interface IEdge extends SimulationLinkDatum<SimulationNodeDatum> {
     linkId: string; 
     name: string;
     layoutId: number;
+}
+
+export interface ILayout {
+    id: number;
+    name: string;
+    displayName: string;
+    data: INwData;
+    transform: TransformInfo;
+    hasLoaded: boolean;
+    isPositioningCrucial: boolean;
 }
 
 export interface ServicePayload {

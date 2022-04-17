@@ -1,15 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Observable } from 'rxjs';
-import { defaultNwAttribute, defaultNwEdgeConfig, defaultNwNodeConfig, NwAlert, NwAttribute, NwEdge, NwNodeAlertAttribute, NwNodeAlertPosition, NwNodeAlertSlot, NwNodeType } from '../models/nw-config'; 
+import { defaultNwEdgeConfig, defaultNwNodeConfig, NwAttribute, NwEdge, NwNodeAlertAttribute, NwNodeAlertPosition, NwNodeAlertSlot, NwNodeType } from '../models/nw-config'; 
 import { defaultNwConfig, NwConfig, NwNode} from "../models/nw-config"; 
 import { EMPTY_STRING, isArrayOfNonEmptyStrings, toBoolean, toPositiveInteger } from "../utils";
 
 const ERROR_STR = "Config-parse Error: ";
-
-interface NwRawConfig {
-    [key: string]: any;
-}
 
 @Injectable()
 export class ConfigParserService {
@@ -213,7 +209,6 @@ export class ConfigParserService {
 
     private setAlerts() {
         const alertRawConfig = (this.nwRawConfig && this.nwRawConfig.alert? this.nwRawConfig.alert: {});
-        const validNodeTypes = Array.from(this.nwNodeTypes.keys());
         this.nwConfig.alert = {nodeAttributes: []};
         if(alertRawConfig && Array.isArray(alertRawConfig.nodeAttributes)) {
             for (const nAttr of alertRawConfig.nodeAttributes) {

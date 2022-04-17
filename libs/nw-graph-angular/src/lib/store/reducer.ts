@@ -1,11 +1,12 @@
-import { ActionTypes, ChangeActiveLayout, CollapseNode, CollapseNodeContext, ExcludeNodeTypes, ExpandNode, ExpandNodeContext, ExpandOnlyRootNode, LoadExternalData, ResetVisibleNodesPositions, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
-import { initialState, State } from './state';
+import { ActionTypes, ChangeActiveLayout, CollapseNode, CollapseNodeContext, ExcludeNodeTypes, ExpandNode, 
+        ExpandNodeContext, LoadExternalData, SelectNode, SelectOnlyClickedNode, UpdateNodeLoadingStatus } from './actions'; 
+import { getInitialState, State } from './state';
 import { Action } from '@ngrx/store';
 import { identifyFullyLoadedNodesByNumHops, nwToString } from '../utils';
 import {cloneDeep as lodashCloneDeep, union as lodashUnion } from "lodash";
-import { EdgeId, IEdge, INode, INwData, NeighboursStateType, NodeId } from '../models/nw-data';
+import { EdgeId, IEdge, INode, NeighboursStateType, NodeId } from '../models/nw-data';
 
-export function graphReducer(state = initialState, action: Action): State {
+export function graphReducer(state = getInitialState(), action: Action): State {
     switch(action.type) { 
         case ActionTypes.TOGGLE_LABEL: { 
             return {
@@ -14,16 +15,18 @@ export function graphReducer(state = initialState, action: Action): State {
             };
         }
         case ActionTypes.RESET_GRAPH: {
-            return {
-                ...initialState
-            };
+            const initialState = getInitialState();
+            initialState.hideLabel = state.hideLabel;
+
+            return initialState;
         }
         case ActionTypes.CHANGE_NUM_HOP: {
-            return {
-                ...initialState,
-                excludedNodeTypes: state.excludedNodeTypes,
-                rootNodeId: state.rootNodeId
-            };
+            const initialState = getInitialState();
+            initialState.excludedNodeTypes = state.excludedNodeTypes;
+            initialState.rootNodeId = state.rootNodeId;
+            initialState.hideLabel = state.hideLabel;
+
+            return initialState;
         }
         case ActionTypes.EXCLUDE_NODE_TYPES: { 
             const payload = (action as ExcludeNodeTypes).payload;
@@ -100,7 +103,6 @@ export function graphReducer(state = initialState, action: Action): State {
             let rootNodeIdForDelta = nwToString(payload.rootNodeId);
             const payloadData = payload.data;
             const maxNodeCount = payload.maxNodeCount;
-            // const nodeCount = parseInt(payload.nodeCount.toString());
             const activeLayout = state.activeLayout;
             let maxNodeCountExceeded = false;
             const isSkewed = payload.isSkewed;
@@ -172,16 +174,13 @@ export function graphReducer(state = initialState, action: Action): State {
             }
 
             return {
-                ...initialState, 
-                rootNodeId: state.rootNodeId, 
+                ...state,
                 data: layouts[activeLayout],
                 nodeTypes: payload.nodeTypes,
                 layouts: layouts,
                 layoutTransform,
                 hasLayoutLoaded,
-                maxNodesExceeded: maxNodeCountExceeded,
-                selectedNodeIds: state.selectedNodeIds,
-                excludedNodeTypes: state.excludedNodeTypes
+                maxNodesExceeded: maxNodeCountExceeded
             };
         }
         case ActionTypes.LOAD_EXTERNAL_DATA: {
@@ -190,16 +189,13 @@ export function graphReducer(state = initialState, action: Action): State {
             const payloadData = payload.data;
             const maxNodeCount = payload.maxNodeCount;
             const nodeCount = parseInt(payload.nodeCount.toString());
-            const originalRootNodeId = state.rootNodeId;
             const activeLayout = state.activeLayout;
-            const graphData = state.data;
             let maxNodeCountExceeded = false;
             const isSkewed = payload.isSkewed;
 
             let layouts = state.layouts;
             let hasLayoutLoaded = state.hasLayoutLoaded;
             let layoutTransform = state.layoutTransform;
-            const stateData = state.data;
 
             const cRootNode = payloadData.nodes.get(rootNodeId);
             if(cRootNode) {
@@ -246,20 +242,17 @@ export function graphReducer(state = initialState, action: Action): State {
             }
 
             return {
-                ...initialState, 
+                ...state,
                 rootNodeId: rootNodeId, 
                 data: layouts[activeLayout],
                 nodeTypes: payload.nodeTypes,
                 layouts: layouts,
                 layoutTransform,
                 hasLayoutLoaded,
-                maxNodesExceeded: maxNodeCountExceeded,
-                selectedNodeIds: state.selectedNodeIds,
-                excludedNodeTypes: state.excludedNodeTypes
+                maxNodesExceeded: maxNodeCountExceeded
             };
         }
         case ActionTypes.EXPAND_ONLY_ROOT_NODE: {
-            // const enableRender = (action as ExpandOnlyRootNode).enableRender;
             const layouts = [...state.layouts];
             const activeLayoutId = state.activeLayout;
             const rootNodeId = nwToString(state.rootNodeId);
@@ -458,8 +451,7 @@ export function graphReducer(state = initialState, action: Action): State {
                 activeLayout: newActiveLayout,
                 layoutTransform: newLayoutTransform,
                 hasLayoutLoaded: newHasLayoutLoaded,
-                data: state.layouts[newActiveLayout],
-                // enableRender: payload.enableRender
+                data: state.layouts[newActiveLayout]
             };
         }
         case ActionTypes.UNSELECT_ALL_NODES: { 

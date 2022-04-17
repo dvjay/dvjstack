@@ -8,9 +8,7 @@ export const getNetworkGraphState: MemoizedSelector<object, GraphState> = create
 
 export const selectGraphData: MemoizedSelector<object, INwData | null> = createSelector(
     getNetworkGraphState, 
-    state => {
-        return state.data;
-    }
+    state => state.data
 );
 export const selectIsHideLabel: MemoizedSelector<object, boolean> = createSelector(
     getNetworkGraphState, 
@@ -51,20 +49,14 @@ export const selectLayoutTransform: MemoizedSelector<object, TransformInfo[]> = 
 export const selectActiveLayoutTransform: MemoizedSelector<object, TransformInfo> = createSelector(
     selectActiveLayout,
     selectLayoutTransform,
-    (activeLayout, layoutTransform) => {
-        return layoutTransform[activeLayout];
-    }
+    (activeLayout, layoutTransform) => layoutTransform[activeLayout]
 );
 export const selectExcludedNodeTypes: MemoizedSelector<object, string[]> = createSelector(
     getNetworkGraphState, 
-    state => {
-        return state.excludedNodeTypes;
-    }
+    state => state.excludedNodeTypes
 );
 export const selectNodeTypes: MemoizedSelector<object, string[]> = createSelector(
     getNetworkGraphState, 
-    state => {
-        return state.nodeTypes;
-    }
+    state => state.nodeTypes
 );
     

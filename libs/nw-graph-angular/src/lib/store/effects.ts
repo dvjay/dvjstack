@@ -1,9 +1,8 @@
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
-import { State as GraphState, STORE_GRAPH_SLICE_NAME} from './state';
-import { ActionTypes, CollapseNode, CollapseNodeContext, ExpandNode, ExpandNodeContext, ExternalDataPayload, LoadExternalDeltaData } from './actions';
+import { Action } from '@ngrx/store';
+import { ActionTypes, CollapseNode, CollapseNodeContext, ExpandNode, ExpandNodeContext } from './actions';
 import { map, tap } from 'rxjs/operators';
 import { GraphUpdateService } from '../services/graph-update.service';
 

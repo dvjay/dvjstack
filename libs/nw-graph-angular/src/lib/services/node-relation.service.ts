@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs'; 
 import { INode, IEdge } from '../models/nw-data';
 
-@Injectable() export class NodeRelationService {
+@Injectable()
+export class NodeRelationService {
     private notificationMoveOverSource = new Subject<CurrentMouseOverNodeOrEdge>(); 
     private notificationMoveOutsource = new Subject<CurrentMouseOverNodeOrEdge>();
     
