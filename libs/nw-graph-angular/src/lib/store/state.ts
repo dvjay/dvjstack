@@ -8,6 +8,7 @@ export interface State {
     // data: INwData | null;
     nodeTypes: string[];
     rootNodeId: string | undefined;
+    rootNodeType: string | undefined;
     selectedNodeIds: string[];
     highlightedNodeIds: string[];
     excludedNodeTypes: string[]; 
@@ -15,10 +16,7 @@ export interface State {
     logs: GraphLog[]; 
     maxNodesExceeded: boolean;
     activeLayout: number;
-    layouts: INwData[];
-    layoutTransform: TransformInfo[];
-    hasLayoutLoaded: boolean[],
-    layouts2?: ILayout[]
+    layouts: ILayout[]
 }
 
 export const initialLayoutData: INwData = { 
@@ -33,13 +31,13 @@ export function getInitialLayoutTransform(): TransformInfo {
     return lodashCloneDeep(initialLayoutTransform);
 }
 
-export function getInitialState(): State {
+export function getInitialLayouts(): ILayout[] {
     // Circualr layout
     const circularLayoutData = getInitialLayoutData();
     const circularLayoutTransform = getInitialLayoutTransform();
     const circularLayout: ILayout = { 
         name: "circular",
-        displayName: "Circular",
+        displayName: "Default",
         data: circularLayoutData,
         transform: circularLayoutTransform,
         hasLoaded: false,
@@ -79,24 +77,21 @@ export function getInitialState(): State {
         isPositioningCrucial: true
     };
 
+    return [circularLayout, forcedLayout, hierarchicalLayout, gridLayout];
+}
+
+export function getInitialState(): State {
     return {
-        // data: null,
         nodeTypes: [],
         selectedNodeIds: [],
         highlightedNodeIds: [],
-        rootNodeId: undefined, 
+        rootNodeId: undefined,
+        rootNodeType: undefined,
         excludedNodeTypes: [], 
         hideLabel: true,
         logs: [], 
         maxNodesExceeded: false,
         activeLayout: 0,
-        // To be deleted - Begin
-        layouts: [{ nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-            { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}, 
-                { nodes: new Map<NodeId, INode>(), edges: new Map<EdgeId, IEdge>()}],
-        layoutTransform: [{x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}, {x: 0, y: 0, k: 1}],
-        hasLayoutLoaded: [false, false, false],
-        // To be deleted - End
-        layouts2: [circularLayout, forcedLayout, hierarchicalLayout, gridLayout]
+        layouts: getInitialLayouts()
     };
 }

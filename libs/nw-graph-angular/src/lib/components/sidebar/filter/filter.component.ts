@@ -1,12 +1,12 @@
+import { ILayout } from './../../../models/nw-data';
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Store } from '@ngrx/store';
-import { State as GraphState, STORE_GRAPH_SLICE_NAME } from './../../../store/state';
+import { State as GraphState } from './../../../store/state';
 import { Subscription } from "rxjs";
 import { NwNodeType } from "../../../models/nw-config";
 import { ConfigParserService } from "../../../services/config-parser.service";
 import * as graphSelectors from '../../../store/selectors';
 import { take } from "rxjs/operators";
-import { GraphUpdateService } from "../../../services/graph-update.service";
 import { ExcludeNodeTypes } from "../../../store/actions";
 
 export interface Task {
@@ -30,35 +30,28 @@ export class FilterComponent implements OnInit, OnDestroy {
     allComplete: boolean = true; 
     excludedNodeTypes: string[] = []; 
     notificationUpdatedSub: Subscription | undefined; 
-    graphDataSub: Subscription | undefined;
     grapActiveLayoutSub: Subscription | undefined;
-    disableFilters = true;
+    currentLayout: ILayout | null = null;
     
-    constructor(private store$: Store<GraphState>, private configParserService: ConfigParserService, private graphUpdateService: GraphUpdateService) {
+    constructor(private store$: Store<GraphState>, private configParserService: ConfigParserService) {
     }
     
     ngOnInit() { 
         this.store$.select(graphSelectors.selectExcludedNodeTypes).pipe(take(1)).subscribe((nTypes) => {
             this.excludedNodeTypes = nTypes;
             this.loadNodeTypes(this.excludedNodeTypes); 
-        }); 
-        this.graphDataSub = this.store$.select(graphSelectors.selectGraphData).subscribe((graphData) => {
-            this.disableFilters = graphData && graphData.nodes.size > 0? false : true;
-        });
-        this.grapActiveLayoutSub = this.store$.select(graphSelectors.selectActiveLayout).subscribe((activeLayout) => {
-            this.disableFilters = activeLayout > 0;
         });
         this.notificationUpdatedSub = this.configParserService.notificationUpdated$.subscribe(() => {
             this.loadNodeTypes(this.excludedNodeTypes);
+        });
+        this.grapActiveLayoutSub = this.store$.select(graphSelectors.selectGraphLayout).subscribe((activeLayout) => {
+            this.currentLayout = activeLayout;
         });
     }
     
     ngOnDestroy() {
         if(this.notificationUpdatedSub) {
             this.notificationUpdatedSub.unsubscribe();
-        }
-        if(this.graphDataSub) {
-            this.graphDataSub.unsubscribe();
         }
         if(this.grapActiveLayoutSub) {
             this.grapActiveLayoutSub.unsubscribe();
@@ -76,7 +69,7 @@ export class FilterComponent implements OnInit, OnDestroy {
     updateAllComplete() {
         this.allComplete = this.task.subtasks != null && this.task.subtasks.every(t => t.included); 
         if(this.allComplete) {
-            this.store$.dispatch(new ExcludeNodeTypes([]));
+            this.store$.dispatch(new ExcludeNodeTypes({excudeNodeTypes: [], currentLayout: this.currentLayout}));
          } else { 
             const nTypes: string[] = []; 
             if(Array.isArray(this.task.subtasks)) {
@@ -86,7 +79,7 @@ export class FilterComponent implements OnInit, OnDestroy {
                     }
                 }); 
             }
-            this.store$.dispatch(new ExcludeNodeTypes(nTypes));
+            this.store$.dispatch(new ExcludeNodeTypes({excudeNodeTypes: nTypes, currentLayout: this.currentLayout}));
         }
     }
     someComplete() : boolean {
@@ -115,9 +108,9 @@ export class FilterComponent implements OnInit, OnDestroy {
         } 
         this.task.subtasks.forEach(t => t.included = included); 
         if(this.allComplete) {
-            this.store$.dispatch(new ExcludeNodeTypes([]));
+            this.store$.dispatch(new ExcludeNodeTypes({excudeNodeTypes: [], currentLayout: this.currentLayout}));
         } else {
-            this.store$.dispatch(new ExcludeNodeTypes(this.allPossibleNodeTypes));
+            this.store$.dispatch(new ExcludeNodeTypes({excudeNodeTypes: this.allPossibleNodeTypes, currentLayout: this.currentLayout}));
         }
     }
 }

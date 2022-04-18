@@ -1,3 +1,4 @@
+import { ILayout } from './../../../models/nw-data';
 import { LayoutChangeMessage } from './../../../services/notification-broker.service';
 import { Component, OnInit, OnDestroy } from '@angular/core'; 
 import { Store } from '@ngrx/store'; 
@@ -9,6 +10,7 @@ import { INwData } from '../../../models/nw-data';
 import { NotificationBrokerService } from '../../../services/notification-broker.service';
 import { GraphUpdateService } from '../../../services/graph-update.service';
 import { CollapseAllNodes, ExpandAllNodes } from '../../../store/actions';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'param-list', 
@@ -22,6 +24,7 @@ export class ParamListComponent implements OnInit, OnDestroy {
     selectedLayout: number = -1;
     activeLayoutSub: Subscription | undefined;
     loadedLayouts: Set<number>;
+    layouts: ILayout[] = [];
 
     constructor(private store$: Store<GraphState>, 
                 private configParserService: ConfigParserService, 
@@ -49,6 +52,9 @@ export class ParamListComponent implements OnInit, OnDestroy {
     }
     
     ngOnInit() {
+        this.store$.select(graphSelectors.selectLayouts).pipe(take(1)).subscribe((layouts) => {
+            this.layouts = layouts;
+        });
         this.activeLayoutSub = this.store$.select(graphSelectors.selectActiveLayout).subscribe((layoutId) => {
             this.numHops = this.configParserService.nwConfig.numHops.toString();
             this.selectedLayout = layoutId;

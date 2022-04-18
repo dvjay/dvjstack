@@ -86,15 +86,16 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
   // layoutId$: Observable<number | undefined> | undefined;
   selectedNodeIds$: any;
   highlightedNodeIds$: Observable<string[]> | undefined;
-  selectDirectLinkedFilterByNodeTypeSubscription: Subscription | undefined;
   selectMaxNodesExceeded$: any;
   selectMaxNodesExceededSubscription: Subscription | undefined;
   selectActiveLayout$: any;
-  selectGraphData$: any;
-  selectRootNodeId$: any;
+  selectGraphData$: Observable<INwData | null> | any;
+  selectRootNodeId$: Observable<string | undefined> | any;
   selectLayoutTransform$: any;
+  selectExcludeNodeTypes$: Observable<string[]> | any;
   selectActiveLayoutSubscription: Subscription | undefined;
   changeLayoutSubscription: Subscription | undefined;
+  displayedNodesChangeSubscription: Subscription | undefined;
   numHopsChangeSubscription: Subscription | undefined;
   /* Observables - End */
 
@@ -128,7 +129,8 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
                 this.selectActiveLayout$ = this.store$.select(graphSelectors.selectActiveLayout);
                 this.selectGraphData$ = this.store$.select(graphSelectors.selectGraphData);
                 this.selectRootNodeId$ = this.store$.select(graphSelectors.selectRootNodeId);
-                this.selectLayoutTransform$ = this.store$.select(graphSelectors.selectLayoutTransform);
+                this.selectLayoutTransform$ = this.store$.select(graphSelectors.selectActiveLayoutTransform);
+                this.selectExcludeNodeTypes$ = this.store$.select(graphSelectors.selectExcludedNodeTypes);
               }
 
   ngOnInit() {
@@ -144,6 +146,13 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
                                                       prevLayoutId: message.previousLayout,
                                                       prevLayoutTransform: {x: zmT.x, y: zmT.y, k: zmT.k}
                                                     }));
+      });
+    this.displayedNodesChangeSubscription = this.notificationBrokerService.notificationDisplayedNodesChange$.subscribe(
+      () => {
+        combineLatest([this.selectRootNodeId$, this.selectGraphData$, this.selectExcludeNodeTypes$]).pipe(take(1)).subscribe(([rootNodeId, graphData, excludeNodeTypes]) => {
+          let visibleNodes = this.graphUpdateService.getVisibleNodes(rootNodeId as string, graphData as INwData, excludeNodeTypes as string[]);
+          this.dataUpdated.emit(visibleNodes);
+        });
       });
     
     this.graphEngineService.ticker.subscribe((d: any) => {
@@ -174,7 +183,7 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
         console.log("Received external data with 0 nodes");
         return;
       }
-      combineLatest([this.selectRootNodeId$, this.selectGraphData$]).pipe(take(1)).subscribe(([rootNodeIdFromStore, graphData]) => {
+      this.selectRootNodeId$.pipe(take(1)).subscribe((rootNodeIdFromStore: string) => {
         this.graphUpdateService.positionDeltaNodesFromData(this.rootNodeId, this.dataBuilderService.nwData);
         if(rootNodeIdFromStore) { //Subset of graph
           if(this.rootNodeId !== rootNodeIdFromStore) {
@@ -206,16 +215,6 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
             isSkewed: this.dataBuilderService.isSkewed
           }));
         }
-        this.selectGraphData$.pipe(take(1)).subscribe((gData: INwData) => {
-          if(gData && gData.nodes) {
-            this.dataUpdated.emit(gData);
-          } else {
-            const ngData = {} as INwData;
-            ngData.nodes = new Map<string, INode>();
-            ngData.edges = new Map<string, IEdge>();
-            this.dataUpdated.emit(ngData);
-          }
-        });
       });
     }
   }
@@ -234,17 +233,14 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     this.selectActiveLayoutSubscription = this.selectActiveLayout$.subscribe(
         (layoutId: number) => { 
           this.selectLayoutTransform$.pipe(take(1)).subscribe((layoutTransform: any) => {
-            this.transformVal = layoutTransform[layoutId];
+            this.transformVal = layoutTransform;
             this.layoutId = layoutId;
           });
         });
   }
 
   ngOnDestroy() {
-    this.graphEngineService.ticker.unsubscribe(); 
-    if(this.selectDirectLinkedFilterByNodeTypeSubscription) {
-      this.selectDirectLinkedFilterByNodeTypeSubscription.unsubscribe();
-    }
+    this.graphEngineService.ticker.unsubscribe();
     if(this.selectMaxNodesExceededSubscription) {
       this.selectMaxNodesExceededSubscription.unsubscribe();
     }
@@ -253,6 +249,9 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
     }
     if(this.changeLayoutSubscription) {
       this.changeLayoutSubscription.unsubscribe();
+    }
+    if(this.displayedNodesChangeSubscription) {
+      this.displayedNodesChangeSubscription.unsubscribe();
     }
     if(this.numHopsChangeSubscription) {
       this.numHopsChangeSubscription.unsubscribe();

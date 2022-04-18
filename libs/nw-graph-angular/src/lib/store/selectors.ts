@@ -1,4 +1,4 @@
-import { INwData } from './../models/nw-data';
+import { INwData, ILayout } from './../models/nw-data';
 import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store';
 import { State as GraphState, STORE_GRAPH_SLICE_NAME} from './state';
 import { GraphLog } from '../models/graph-log';
@@ -10,17 +10,17 @@ export const selectGraphData: MemoizedSelector<object, INwData | null> = createS
     getNetworkGraphState, 
     state => {
         if(Array.isArray(state.layouts) && state.layouts[state.activeLayout]) {
-            return state.layouts[state.activeLayout];
+            return state.layouts[state.activeLayout].data;
         } else {
             return null;
         }
     }
 );
-export const selectGraphData2: MemoizedSelector<object, INwData | null> = createSelector(
+export const selectGraphLayout: MemoizedSelector<object, ILayout | null> = createSelector(
     getNetworkGraphState, 
     state => {
-        if(Array.isArray(state.layouts2) && state.layouts[state.activeLayout]) {
-            return state.layouts2[state.activeLayout].data;
+        if(Array.isArray(state.layouts) && state.layouts[state.activeLayout]) {
+            return state.layouts[state.activeLayout];
         } else {
             return null;
         }
@@ -33,6 +33,10 @@ export const selectIsHideLabel: MemoizedSelector<object, boolean> = createSelect
 export const selectRootNodeId: MemoizedSelector<object, string | undefined> = createSelector(
     getNetworkGraphState, 
     state => state.rootNodeId
+);
+export const selectRootNodeType: MemoizedSelector<object, string | undefined> = createSelector(
+    getNetworkGraphState, 
+    state => state.rootNodeType
 );
 export const selectLogs: MemoizedSelector<object, GraphLog[]> = createSelector(
     getNetworkGraphState, 
@@ -54,18 +58,19 @@ export const selectActiveLayout: MemoizedSelector<object, number> = createSelect
     getNetworkGraphState, 
     state => state.activeLayout
 );
-export const selectLayouts: MemoizedSelector<object, INwData[]> = createSelector(
+export const selectLayouts: MemoizedSelector<object, ILayout[]> = createSelector(
     getNetworkGraphState, 
     state => state.layouts
 );
-export const selectLayoutTransform: MemoizedSelector<object, TransformInfo[]> = createSelector(
+export const selectActiveLayoutTransform: MemoizedSelector<object, TransformInfo | null> = createSelector(
     getNetworkGraphState, 
-    state => state.layoutTransform
-);
-export const selectActiveLayoutTransform: MemoizedSelector<object, TransformInfo> = createSelector(
-    selectActiveLayout,
-    selectLayoutTransform,
-    (activeLayout, layoutTransform) => layoutTransform[activeLayout]
+    state => {
+        if(Array.isArray(state.layouts) && state.layouts[state.activeLayout]) {
+            return state.layouts[state.activeLayout].transform;
+        } else {
+            return null;
+        }
+    }
 );
 export const selectExcludedNodeTypes: MemoizedSelector<object, string[]> = createSelector(
     getNetworkGraphState, 

@@ -32,13 +32,12 @@ export class GraphUpdateService {
 
     tickGraph(clickedNodeId?: string) {
         const combinedGraphData$ = combineLatest([this.selectRootNodeId$, 
-                                                    this.selectGraphData$, 
-                                                    this.selectNodeTypes$,
+                                                    this.selectGraphData$,
                                                     this.selectExcludedNodeTypes$,
                                                     this.selectActiveLayout$]);
 
 
-        combinedGraphData$.pipe(take(1)).subscribe(([rootNodeId, allNodesData, nodeTypes, excludedNodeTypes, activeLayout]) => {
+        combinedGraphData$.pipe(take(1)).subscribe(([rootNodeId, allNodesData, excludedNodeTypes, activeLayout]) => {
             if(activeLayout === 0) {
                 const visibleNodeData = this.getVisibleNodes(rootNodeId as string, allNodesData as INwData, excludedNodeTypes as string[]);
                 if(clickedNodeId) {
@@ -48,13 +47,6 @@ export class GraphUpdateService {
                     }
                 }
                 if(visibleNodeData) {
-                    // let someNodesNotPositioned = false;
-                    // for (const [key, value] of visibleNodeData.nodes) {
-                    //     if(!(value.x && value.y)) {
-                    //         someNodesNotPositioned = true;
-                    //         break;
-                    //     }
-                    // }
                     this.graphEngineService.updateGraph(visibleNodeData);
                 }
             }
@@ -242,12 +234,12 @@ export class GraphUpdateService {
         });
     }
 
-    getVisibleNodes(rootNodeId: string, graphData: INwData, excludeNodeTypes: string[]) {
+    getVisibleNodes(rootNodeId: string, graphData: INwData, excludeNodeTypes: string[]): INwData {
         const directLinked = this.selectDirectLinkedNodesAndEdges(rootNodeId, graphData);
         return this.selectDirectLinkedFilterByNodeType(directLinked, excludeNodeTypes);
     }
 
-    selectDirectLinkedNodesAndEdges(rootNodeId: string, graphData: INwData) {
+    private selectDirectLinkedNodesAndEdges(rootNodeId: string, graphData: INwData) {
         const nodes = graphData ? graphData.nodes: new Map<string, INode>(); 
         const edges = graphData ? graphData.edges: new Map<string, IEdge>(); 
         const filteredNodes = new Map<string, INode>(); 
@@ -292,7 +284,7 @@ export class GraphUpdateService {
         return { nodes: filteredNodes, edges: filteredLinks};
     }
 
-    selectDirectLinkedFilterByNodeType(directLinked: INwData, excludeNodeTypes: string[]) {
+    private selectDirectLinkedFilterByNodeType(directLinked: INwData, excludeNodeTypes: string[]) {
         const nodes = directLinked.nodes; 
         const edges = directLinked.edges; 
         const filteredNodes = new Map<string, INode>(); 
@@ -342,7 +334,7 @@ export class GraphUpdateService {
         return Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
     }
 
-    getSubsetGraphByNodeIds(contributingNodes: INode[], allNodesData: INwData, excludedNodeTypes: string[]): INwData {
+    private getSubsetGraphByNodeIds(contributingNodes: INode[], allNodesData: INwData, excludedNodeTypes: string[]): INwData {
         const cNodes = new Map<string, INode>();
         const cEdges = new Map<string, IEdge>();
 

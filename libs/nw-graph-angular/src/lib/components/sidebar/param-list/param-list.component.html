@@ -12,27 +12,13 @@
     <div class="setting-lbl">Views:</div>
     <div class="layouts-container">
         <form class="layouts-frm">
-            <label class="layout-lbl">
+            <label class="layout-lbl" *ngFor="let layout of layouts; let i = index">
                 <input type="radio" 
                         name="radio" 
-                        value="0"
-                        [checked]="selectedLayout === 0"
-                        (change)="onLayoutChange(0)"/>
-                <span>Default</span>
-            </label>
-            <label class="layout-lbl">
-                <input type="radio"
-                        value="1"
-                        [checked]="selectedLayout === 1"
-                        (change)="onLayoutChange(1)"/>
-                <span>Hierarchical</span>
-            </label>
-            <label class="layout-lbl">
-                <input type="radio"
-                        value="2"
-                        [checked]="selectedLayout === 2"
-                        (change)="onLayoutChange(2)"/>
-                <span>Grid</span>
+                        value="{{i}}"
+                        [checked]="selectedLayout === i"
+                        (change)="onLayoutChange(i)"/>
+                <span>{{layout.displayName}}</span>
             </label>
         </form>
     </div>

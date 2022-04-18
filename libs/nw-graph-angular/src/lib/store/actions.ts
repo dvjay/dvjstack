@@ -1,3 +1,4 @@
+import { ILayout } from './../models/nw-data';
 import { Action } from '@ngrx/store'; 
 import { TransformInfo } from '../models/load-nodes-payload';
 import { INode, IEdge, INwData } from '../models/nw-data';
@@ -56,9 +57,14 @@ export interface CollapseNodeContext {
     currentVisibleEdges: IEdge[];
 }
 
+export interface ExcludeNodeTypesContext { 
+    excudeNodeTypes: string[] | null; 
+    currentLayout: ILayout | null;
+}
+
 export class ExcludeNodeTypes implements Action {
     public readonly type = ActionTypes.EXCLUDE_NODE_TYPES; 
-    constructor(public payload: string[]) {}
+    constructor(public payload: ExcludeNodeTypesContext) {}
 }
 export class ExpandNode implements Action {
     public readonly type = ActionTypes.EXPAND_NODE; 

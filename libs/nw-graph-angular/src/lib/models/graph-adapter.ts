@@ -13,4 +13,4 @@ export interface GraphOptions {
     edgeLength: number;
 }
 
-export const DEFAULT_GRAPH_OPTIONS: GraphOptions = { width: 2000, height: 725, nodeRadius: 30, edgeLength: 250 };
+export const DEFAULT_GRAPH_OPTIONS: GraphOptions = { width: 2000, height: 725, nodeRadius: 30, edgeLength: 140 };
