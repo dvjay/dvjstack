@@ -437,7 +437,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
 }
 
 function getGraphDataFromGraphState(gState: State): INwData | null {
-    if(gState && Array.isArray(gState.layouts) && gState.activeLayout) {
+    if(gState && Array.isArray(gState.layouts)) {
         return gState.layouts[gState.activeLayout].data;
     } else {
         return null;

@@ -178,7 +178,7 @@ export const config = {
     },
     "alert": {
       "nodeAttributes": [{ "nodeType": "gfctCase", "attribute": "casetype", "condition": "typeof value === 'string' && (value.toUpperCase() === 'AML' || value.toUpperCase() === 'FRD')", "position": "NE", "message": "AML/FRD Alert", "color": "#fdee00"},
-                          { "nodeType": "gfctEntity", "attribute": "src", "condition": "typeof value === 'string' && value.toUpperCase() === 'DNDB'", "position": "N", "message": "DNDB Alert", "imagePath": "assets/images/itn.png", "color": "#ff0000"},
+                          { "nodeType": "gfctEntity", "attribute": "src", "condition": "typeof value === 'string' && value.toUpperCase() === 'DNDB'", "position": "N", "message": "DNDB Alert", "color": "#ff0000"},
                           { "nodeType": "gfctEntity", "attribute": "isSkewed", "condition": "typeof value === 'string' && value.toUpperCase() === 'TRUE'", "position": "NW", "message": "Skewed Node", "color": "#ffe800"},
                           { "nodeType": "gfctParty", "attribute": "isSkewed", "condition": "typeof value === 'string' && value.toUpperCase() === 'TRUE'", "position": "NW", "message": "Skewed Node", "color": "#ffe800"},
                           { "nodeType": "gfctAccount", "attribute": "isSkewed", "condition": "typeof value === 'string' && value.toUpperCase() === 'TRUE'", "position": "NW", "message": "Skewed Node", "color": "#ffe800"},

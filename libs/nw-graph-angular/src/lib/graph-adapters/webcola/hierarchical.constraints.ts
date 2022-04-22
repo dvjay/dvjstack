@@ -2,25 +2,45 @@ import { forceSimulation, forceManyBody, forceCollide, forceLink } from 'd3-forc
 import * as d3 from 'd3';
 import { GraphOptions } from "../../models/graph-adapter";
 import { forceX, forceY } from 'd3';
+import { IEdge, INode, INwData } from "./../../models/nw-data";
 
-interface TreeLink {
+export interface TLink {
     source: number;
     target: number;
 }
 
-interface TreeNode {
+export interface TNode {
     orignalIndex?: number;
-    children?: TreeNode[];
+    children?: TNode[];
 }
 
-export function treeConstrainsts(d3Cola: any, rootNodeIndex: number, nodes: any[], links: any[], options: GraphOptions): any {
+export function hierarchicalConstrainsts(data: INwData, rootNode: INode, nodeTypes: string[], options: GraphOptions): any[] {
     const visitedNodesIndices: number[] = [];
-    // const setcolaLinks: SetcolaLink[] = [];
-    const treeData = [] as TreeNode[];
-    const totalValues = (startIndex: number, tData: TreeNode[], nestedLinks: TreeLink[]) => {
+    const treeData = [] as TNode[];
+    let nodeKeys: any[] = [];
+    let nodes: any[] = [];
+    let links: any[] = [];
+    let rootNodeIdIndex = 0;
+    
+    data.nodes.forEach((node: INode, key: string | undefined) => {
+        if(key === rootNode.nodeId) {
+            rootNodeIdIndex = nodeKeys.length;
+        }
+        nodeKeys.push(key);
+        nodes.push({name: node.nodeId, order: 0, type: node.nodeType });
+    });
+
+    data.edges.forEach((value: IEdge) => {
+        let sourceIdx = nodeKeys.indexOf(value.sourceNodeId);
+        let targetIdx = nodeKeys.indexOf(value.targetNodeId);
+        if(sourceIdx > -1 && targetIdx > -1) {
+            links.push({source: sourceIdx, target: targetIdx});
+        }
+    });
+    const totalValues = (startIndex: number, tData: TNode[], nestedLinks: TLink[]) => {
         visitedNodesIndices.push(startIndex);
-        const targetLinks: TreeLink[] = [];
-        const restTargetLinks: TreeLink[] = [];
+        const targetLinks: TLink[] = [];
+        const restTargetLinks: TLink[] = [];
         nestedLinks.forEach(x => {
             if(x.source === startIndex || x.target === startIndex) {
                 if(x.source === startIndex) {
@@ -39,7 +59,7 @@ export function treeConstrainsts(d3Cola: any, rootNodeIndex: number, nodes: any[
         }
     };
 
-    totalValues(rootNodeIndex, treeData, links as TreeLink[]);
+    totalValues(rootNodeIdIndex, treeData, links as TLink[]);
     // const nodeWidth = 100;
     // const nodeHeight = 100;
     // const horizontalSeparationBetweenNodes = 16;
@@ -69,5 +89,5 @@ export function treeConstrainsts(d3Cola: any, rootNodeIndex: number, nodes: any[
                             .force("y", forceY(options.height/2))
                             .stop();
     simulation.tick(500);
-    return d3Cola;
+    return nodes;
 }
