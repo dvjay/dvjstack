@@ -19,8 +19,7 @@ export default class WebcolaAdapter implements GraphAdapter {
 
         switch(layoutId) {
             case 0:
-                // nodes = circularConstrainsts(data, rootNode, nodeTypes, this.options);
-                nodes = forcedConstrainsts(data, rootNode, nodeTypes, this.options);
+                nodes = circularConstrainsts(data, rootNode, nodeTypes, this.options);
                 break;
             case 2:
                 nodes = hierarchicalConstrainsts(data, rootNode, nodeTypes, this.options);

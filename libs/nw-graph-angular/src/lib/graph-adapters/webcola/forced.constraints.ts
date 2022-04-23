@@ -7,13 +7,13 @@ export function forcedConstrainsts(data: INwData, rootNode: INode, _: string[], 
     let nodeKeys: any[] = [];
     let nodes: any[] = [];
     let links: any[] = [];
-    let rootNodeIdIndex = 0;
-    const linkDistance = options.edgeLength;
+    // let rootNodeIdIndex = 0;
+    // const linkDistance = options.edgeLength;
     
     data.nodes.forEach((node: INode, key: string | undefined) => {
-        if(key === rootNode.nodeId) {
-            rootNodeIdIndex = nodeKeys.length;
-        }
+        // if(key === rootNode.nodeId) {
+        //     rootNodeIdIndex = nodeKeys.length;
+        // }
         nodeKeys.push(key);
         nodes.push({name: node.nodeId, order: 0, type: node.nodeType });
     });
@@ -30,7 +30,7 @@ export function forcedConstrainsts(data: INwData, rootNode: INode, _: string[], 
                             .size([options.width, options.height])
                             .avoidOverlaps(true)
                             .defaultNodeSize(options.nodeRadius * 2)
-                            .linkDistance(linkDistance)
+                            .linkDistance(options.edgeLength)
                             .nodes(nodes)
                             .links(links);
                             // .groups(groups);

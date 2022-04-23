@@ -12,6 +12,7 @@
     box-shadow:0 0 10px rgba(0, 0, 0, 0.6); 
     box-sizing: content-box;
     overflow: hidden;
+    /* background-color: #303030; */
 }
 .graph-svg-section { 
     position: relative; 
