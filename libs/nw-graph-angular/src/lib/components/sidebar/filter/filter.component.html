@@ -1,6 +1,6 @@
 <ng-container>
     <div class="nw-filter-chk-row">
-        <div>
+        <div class="nw-filter-chk">
             <mat-checkbox [checked]="allComplete" [indeterminate]="someComplete()" (change)="setAll($event.checked)">
             </mat-checkbox> 
         </div>
@@ -8,7 +8,7 @@
     </div> 
     <div class="nw-filter-chk-row" *ngFor="let subtask of task.subtasks"> 
         <div class="nw-filter-chk">
-            <mat-checkbox [(ngModel)]="subtask.included" (ngModelChange)="updateAllComplete()"></mat-checkbox>
+            <mat-checkbox [(ngModel)]="subtask.included" (ngModelChange)="updateAllComplete()" *ngIf="(rootNodeType$ | async) !== subtask.type!.name"></mat-checkbox>
         </div> 
         <div class="nw-filter-chk-label"> 
             <div class="nw-filter-chk-img" [style.background-color]="subtask.type!.color">

@@ -1,67 +1,82 @@
-import { centerArray } from "../../utils";
-import { setcola } from "./setcola";
-import { IEdge, INode, INwData } from "./../../models/nw-data";
-import { GraphOptions } from "./../../models/graph-adapter";
-import * as cola from 'webcola';
-import * as d3 from 'd3';
+import { GraphOptions } from "../../models/graph-adapter";
+import { INode, INwData } from '../../models/nw-data';
+
+interface dummyNode {
+    name: string;
+    x?: number;
+    y?: number;
+}
 
 export function gridConstrainsts(data: INwData, rootNode: INode, nodeTypes: string[], options: GraphOptions): any[] {
-    let nodeKeys: any[] = [];
+    let maxVirticalGap = 140;
+    let maxHorizontalGap = 140;
+    const margin = 40;
+    const viewportHeight = (options.height - (margin * 2));
+    const viewportWidth = (options.width - (margin * 2));
+    // let mostCountOfNodeTypes = 0;
+    let startYCordinate = 0;
+    const nodesByNodetypes = new Map<string, dummyNode[]>();
+
+    for (const [key,  value] of data.nodes) {
+        value.name = key;
+        if(typeof value.nodeType === 'string') {
+            const nodes = nodesByNodetypes.get(value.nodeType);
+            if(Array.isArray(nodes)) {
+                nodes.push({name: value.nodeId});
+            } else {
+                nodesByNodetypes.set(value.nodeType, [{name: value.nodeId}]);
+            }
+        }
+    }
+
+    if(nodesByNodetypes.size > 0) {
+        if((maxVirticalGap * (nodesByNodetypes.size - 1)) > viewportHeight) {
+            if(nodesByNodetypes.size === 1) {
+                startYCordinate = options.height/2;
+            } else {
+                maxVirticalGap = (viewportHeight / (nodesByNodetypes.size - 1));
+                startYCordinate = margin;
+            }
+        } else {
+            if(nodesByNodetypes.size === 1) {
+                startYCordinate = options.height/2;
+            } else {
+                startYCordinate = margin + ((viewportHeight-(maxVirticalGap * nodesByNodetypes.size - 1))/2);
+            }
+        }
+    } else {
+        return [];
+    }
+
+    let nodeTypeCounter = 0;
+    for (const [_, nodeTypeNodes] of nodesByNodetypes) {
+        let startXCordinate = -1;
+        if((maxHorizontalGap * (nodeTypeNodes.length - 1)) > viewportWidth) {
+            if(nodeTypeNodes.length === 1) {
+                startXCordinate = options.width/2;
+            } else {
+                maxHorizontalGap = (viewportWidth / (nodeTypeNodes.length - 1));
+                startXCordinate = margin;
+            }
+        } else {
+            if(nodeTypeNodes.length === 1) {
+                startXCordinate = options.width/2;
+            } else {
+                startXCordinate = margin + ((viewportWidth-(maxHorizontalGap * nodeTypeNodes.length - 1))/2);
+            }
+        }
+        nodeTypeNodes.forEach((node, i) => {
+            node.x = startXCordinate + (maxHorizontalGap * i);
+            node.y = startYCordinate + (maxVirticalGap * nodeTypeCounter);
+        });
+        ++nodeTypeCounter;
+    }
+
     let nodes: any[] = [];
-    let links: any[] = [];
-    let rootNodeIdIndex = 0;
-    const linkDistance = options.edgeLength;
-    
-    data.nodes.forEach((node: INode, key: string | undefined) => {
-        if(key === rootNode.nodeId) {
-            rootNodeIdIndex = nodeKeys.length;
-        }
-        nodeKeys.push(key);
-        nodes.push({name: node.nodeId, order: 0, type: node.nodeType });
+    nodesByNodetypes.forEach((nodeIds: dummyNode[]) => {
+        nodes = nodes.concat(nodeIds);
     });
 
-    data.edges.forEach((value: IEdge) => {
-        let sourceIdx = nodeKeys.indexOf(value.sourceNodeId);
-        let targetIdx = nodeKeys.indexOf(value.targetNodeId);
-        if(sourceIdx > -1 && targetIdx > -1) {
-            links.push({source: sourceIdx, target: targetIdx});
-        }
-    });
-    const orderedNodeTypes = centerArray(nodeTypes);
-
-    let constraintDefinitions = [
-        {
-            name: "nw_level",
-            sets: {"partition": "type"},
-            forEach: [
-                { constraint: "order", axis: "x", by: "order", gap: 70 },
-                { constraint: "align", axis: "x" }
-            ]
-        },
-        {
-            sets: ["nw_level"],
-            forEach: [{ 
-                constraint: "order",
-                axis: "y", 
-                by: "type",
-                gap: 70,
-                order: orderedNodeTypes
-            }]
-        }
-    ];
-
-    let _setCola = setcola.nodes(nodes).links(links).guides([]).constraints(constraintDefinitions).gap(70).layout();
-
-    const d3cola = cola.d3adaptor(d3)
-                        .size([options.width, options.height])
-                        .avoidOverlaps(true)
-                        .defaultNodeSize(options.nodeRadius * 2)
-                        .linkDistance(linkDistance)
-                        .nodes(_setCola.nodes)
-                        .links(_setCola.links)
-                        .groups([])
-                        .constraints(_setCola.constraints);
-    d3cola.start(50, 100, 200);
-    d3cola.stop();
     return nodes;
+
 }

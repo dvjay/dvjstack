@@ -11,7 +11,8 @@ export enum NeighboursStateType {
 export interface INode extends SimulationNodeDatum {
     id?: string; 
     type?: string; 
-    label?: string; 
+    label?: string;
+    name?: string;
     r?: number;
     r0?: number;
     neighboursLoaded: boolean;

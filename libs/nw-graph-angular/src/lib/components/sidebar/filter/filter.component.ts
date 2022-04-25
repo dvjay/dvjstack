@@ -2,7 +2,7 @@ import { ILayout } from './../../../models/nw-data';
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Store } from '@ngrx/store';
 import { State as GraphState } from './../../../store/state';
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { NwNodeType } from "../../../models/nw-config";
 import { ConfigParserService } from "../../../services/config-parser.service";
 import * as graphSelectors from '../../../store/selectors';
@@ -32,6 +32,7 @@ export class FilterComponent implements OnInit, OnDestroy {
     notificationUpdatedSub: Subscription | undefined; 
     grapActiveLayoutSub: Subscription | undefined;
     currentLayout: ILayout | null = null;
+    rootNodeType$: Observable<string | undefined> | undefined;
     
     constructor(private store$: Store<GraphState>, private configParserService: ConfigParserService) {
     }
@@ -47,6 +48,7 @@ export class FilterComponent implements OnInit, OnDestroy {
         this.grapActiveLayoutSub = this.store$.select(graphSelectors.selectGraphLayout).subscribe((activeLayout) => {
             this.currentLayout = activeLayout;
         });
+        this.rootNodeType$ = this.store$.select(graphSelectors.selectRootNodeType);
     }
     
     ngOnDestroy() {

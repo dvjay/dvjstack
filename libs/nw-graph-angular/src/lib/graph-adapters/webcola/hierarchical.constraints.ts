@@ -1,93 +1,112 @@
-import { forceSimulation, forceManyBody, forceCollide, forceLink } from 'd3-force';
 import * as d3 from 'd3';
 import { GraphOptions } from "../../models/graph-adapter";
-import { forceX, forceY } from 'd3';
-import { IEdge, INode, INwData } from "./../../models/nw-data";
+import { INode, INwData } from '../../models/nw-data';
+import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY, SimulationLinkDatum, SimulationNodeDatum } from 'd3-force';
 
-export interface TLink {
+interface TreeLink extends SimulationLinkDatum<SimulationNodeDatum> {
     source: number;
     target: number;
 }
 
-export interface TNode {
-    orignalIndex?: number;
-    children?: TNode[];
+interface TreeNode extends SimulationNodeDatum {
+    index: number;
+    name: string;
+    x?: number;
+    y?: number;
+    fx?: number;
+    fy?: number;
+    children: TreeNode[];
 }
 
 export function hierarchicalConstrainsts(data: INwData, rootNode: INode, nodeTypes: string[], options: GraphOptions): any[] {
-    const visitedNodesIndices: number[] = [];
-    const treeData = [] as TNode[];
-    let nodeKeys: any[] = [];
-    let nodes: any[] = [];
-    let links: any[] = [];
-    let rootNodeIdIndex = 0;
-    
-    data.nodes.forEach((node: INode, key: string | undefined) => {
-        if(key === rootNode.nodeId) {
-            rootNodeIdIndex = nodeKeys.length;
+    const sourceNodeIds = new Set<string>();
+    const targetNodeIds = new Set<string>();
+    const selectedNodes: TreeNode[] = [];
+    const selectedEdges: TreeLink[] = [];
+    {
+        let i = 0;
+        for(var [_,value] of data.nodes) {
+            selectedNodes.push({index: i, name: value.nodeId, children: []});
+            value.index = i;
+            ++i;
         }
-        nodeKeys.push(key);
-        nodes.push({name: node.nodeId, order: 0, type: node.nodeType });
-    });
+    }
 
-    data.edges.forEach((value: IEdge) => {
-        let sourceIdx = nodeKeys.indexOf(value.sourceNodeId);
-        let targetIdx = nodeKeys.indexOf(value.targetNodeId);
-        if(sourceIdx > -1 && targetIdx > -1) {
-            links.push({source: sourceIdx, target: targetIdx});
-        }
-    });
-    const totalValues = (startIndex: number, tData: TNode[], nestedLinks: TLink[]) => {
-        visitedNodesIndices.push(startIndex);
-        const targetLinks: TLink[] = [];
-        const restTargetLinks: TLink[] = [];
-        nestedLinks.forEach(x => {
-            if(x.source === startIndex || x.target === startIndex) {
-                if(x.source === startIndex) {
-                    targetLinks.push(x);
+    const totalValues = (nodeId: string) => {
+        const nodeIdNode = data.nodes.get(nodeId);
+        if(nodeIdNode && typeof nodeIdNode.index === 'number' && !sourceNodeIds.has(nodeId)) {        
+            sourceNodeIds.add(nodeId);
+            const unexploredTargets = new Map<string, string[]>(nodeTypes.map(nType => [nType, []]));
+            for (const [_, value] of data.edges) {
+                if(value.sourceNodeId === nodeId && !sourceNodeIds.has(value.targetNodeId) && !targetNodeIds.has(value.targetNodeId)) {
+                    const tNodeIdNode = data.nodes.get(value.targetNodeId);
+                    if(tNodeIdNode && typeof tNodeIdNode.index === 'number') {
+                        const nodeIdsByNodeType = unexploredTargets.get(tNodeIdNode.nodeType);
+                        if(nodeIdsByNodeType) {
+                            targetNodeIds.add(value.targetNodeId);
+                            nodeIdsByNodeType.push(value.targetNodeId);
+                            const chn = selectedNodes[nodeIdNode.index].children;
+                            if(chn.indexOf(selectedNodes[tNodeIdNode.index]) < 0) {
+                                chn.push(selectedNodes[tNodeIdNode.index]);
+                                selectedEdges.push({source: nodeIdNode.index, target: tNodeIdNode.index});
+                            }
+                        }
+                    }
                 }
-            } else {
-                restTargetLinks.push(x);
+                if(value.targetNodeId === nodeId && !sourceNodeIds.has(value.sourceNodeId) && !targetNodeIds.has(value.sourceNodeId)) {
+                    const sNodeIdNode = data.nodes.get(value.sourceNodeId);
+                    if(sNodeIdNode && typeof sNodeIdNode.index === 'number') {
+                        const nodeIdsByNodeType = unexploredTargets.get(sNodeIdNode.nodeType);
+                        if(nodeIdsByNodeType) {
+                            targetNodeIds.add(value.sourceNodeId);
+                            nodeIdsByNodeType.push(value.sourceNodeId);
+                            // selectedEdges.push({source: nodeIdNode.index, target: sNodeIdNode.index});
+                            const chn = selectedNodes[nodeIdNode.index].children;
+                            if(chn.indexOf(selectedNodes[sNodeIdNode.index]) < 0) {
+                                chn.push(selectedNodes[sNodeIdNode.index]);
+                                selectedEdges.push({source: nodeIdNode.index, target: sNodeIdNode.index});
+                            }
+                        }
+                    }
+                }
             }
-        });
-        const tfgData: any = {orignalIndex: startIndex, children: []};
-        tData.push(tfgData);
-        for (const tgt of targetLinks) {
-            if(visitedNodesIndices.indexOf(tgt.target) === -1) {
-                totalValues(tgt.target, tfgData.children, restTargetLinks);
+            let nodeIdsToExplore: string[] = [];
+            for (const [_, val] of unexploredTargets) {
+                nodeIdsToExplore = nodeIdsToExplore.concat(val);
+            }
+            for (const n of nodeIdsToExplore) {
+                totalValues(n);
             }
         }
     };
 
-    totalValues(rootNodeIdIndex, treeData, links as TLink[]);
-    // const nodeWidth = 100;
-    // const nodeHeight = 100;
-    // const horizontalSeparationBetweenNodes = 16;
-    // const verticalSeparationBetweenNodes = 128;
+    totalValues(rootNode.nodeId);
+
     const tree = d3.tree()
                     .size([options.width, options.height])
                     // .nodeSize([40, 40])
                     .separation(function(a, b) {
                         return a.parent == b.parent ? 30 : 40;
                     });
-    var root = d3.hierarchy(treeData[0]);
+
+    var root = d3.hierarchy(selectedNodes[typeof rootNode.index === 'number'? rootNode.index : 0]);
     tree(root);
     const descendants = root.descendants();
     for (const d of descendants) {
-        if(d && d.data && d.data.orignalIndex) {
-            nodes[d.data.orignalIndex].x = (d as any).x;
-            nodes[d.data.orignalIndex].y = (d as any).y;
-            nodes[d.data.orignalIndex].fx = (d as any).x;
-            nodes[d.data.orignalIndex].fy = (d as any).y;
+        if(d && d.data && d.data.index) {
+            selectedNodes[d.data.index].x = (d as any).x;
+            selectedNodes[d.data.index].y = (d as any).y;
+            selectedNodes[d.data.index].fx = (d as any).x;
+            selectedNodes[d.data.index].fy = (d as any).y;
         }
     }
-    const simulation = forceSimulation(nodes)
+    const simulation = forceSimulation(selectedNodes)
                             .force("charge", forceManyBody().distanceMax(options.height/2).strength(-2000))
                             .force("collide", forceCollide().radius(30).iterations(10))
-                            .force("link", forceLink(links).distance(150))
+                            .force("link", forceLink(selectedEdges).distance(150))
                             .force("x", forceX(options.width/2))
                             .force("y", forceY(options.height/2))
                             .stop();
     simulation.tick(500);
-    return nodes;
+    return selectedNodes;
 }
