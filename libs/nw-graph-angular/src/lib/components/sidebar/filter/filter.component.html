@@ -5,17 +5,17 @@
             </mat-checkbox> 
         </div>
         <div class="nw-filter-chk-label">Check/ Uncheck All</div> 
-    </div> 
-    <div class="nw-filter-chk-row" *ngFor="let subtask of task.subtasks"> 
+    </div>
+    <div class="nw-filter-chk-row" *ngFor="let nType of nwNodeTypes"> 
         <div class="nw-filter-chk">
-            <mat-checkbox [(ngModel)]="subtask.included" (ngModelChange)="updateAllComplete()" *ngIf="(rootNodeType$ | async) !== subtask.type!.name"></mat-checkbox>
+            <mat-checkbox [(ngModel)]="nType.included" (ngModelChange)="updateAllComplete()" *ngIf="rootNodeType !== nType.type!.name"></mat-checkbox>
         </div> 
         <div class="nw-filter-chk-label"> 
-            <div class="nw-filter-chk-img" [style.background-color]="subtask.type!.color">
-                <img class="item-avatar" src="{{subtask.type!.imagePath}}" alt="Node Type"> 
+            <div class="nw-filter-chk-img" [style.background-color]="nType.type!.color">
+                <img class="item-avatar" src="{{nType.type!.imagePath}}" alt="Node Type"> 
             </div> 
             <div class="nw-filter-chk-txt">
-                <p class="labels-text">{{ subtask.type!.displayName }}</p> 
+                <p class="labels-text">{{ nType.type!.displayName }}</p> 
             </div> 
         </div> 
     </div> 

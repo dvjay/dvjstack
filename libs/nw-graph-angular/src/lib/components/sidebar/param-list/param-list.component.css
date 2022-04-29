@@ -113,3 +113,12 @@
 .expand-collapse-section-item {
   margin-bottom: 10px;
 }
+
+.enable-label-section {
+  display: flex;
+  align-items: flex-start;
+  height: 20px;
+}
+.enable-label-section .enable-lbl-divs {
+  align-self: center;
+}

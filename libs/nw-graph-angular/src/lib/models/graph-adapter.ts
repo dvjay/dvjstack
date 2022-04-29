@@ -2,7 +2,7 @@ import { INode, INwData } from "./nw-data";
 
 export interface GraphAdapter {
     initialize(options: GraphOptions): void;
-    attachNodesPositionByLayout(data: INwData, rootNode: INode, nodeTypes: string[], layoutId: number, shouldNodesFixed: boolean): void;
+    attachNodesPositionByLayout(data: INwData, rootNode: INode, nodeTypes: string[], layoutId: number): void;
     // attachNodesPosition(data: INwData, rootNode: INode): void;
 }
 

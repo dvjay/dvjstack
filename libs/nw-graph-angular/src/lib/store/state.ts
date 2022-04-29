@@ -43,17 +43,6 @@ export function getInitialLayouts(): ILayout[] {
         hasLoaded: false,
         isPositioningCrucial: false
     };
-    // Forced layout
-    const forcedLayoutData = getInitialLayoutData();
-    const forcedLayoutTransform = getInitialLayoutTransform();
-    const forcedLayout: ILayout = { 
-        name: "forced",
-        displayName: "Forced",
-        data: forcedLayoutData,
-        transform: forcedLayoutTransform,
-        hasLoaded: false,
-        isPositioningCrucial: false
-    };
     // hierarchical layout
     const hierarchicalLayoutData = getInitialLayoutData();
     const hierarchicalLayoutTransform = getInitialLayoutTransform();
@@ -77,7 +66,7 @@ export function getInitialLayouts(): ILayout[] {
         isPositioningCrucial: true
     };
 
-    return [circularLayout, forcedLayout, hierarchicalLayout, gridLayout];
+    return [circularLayout, hierarchicalLayout, gridLayout];
 }
 
 export function getInitialState(): State {

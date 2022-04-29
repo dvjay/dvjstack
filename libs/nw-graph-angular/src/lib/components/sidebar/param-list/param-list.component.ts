@@ -9,7 +9,7 @@ import { ConfigParserService } from '../../../services/config-parser.service';
 import { INwData } from '../../../models/nw-data';
 import { NotificationBrokerService } from '../../../services/notification-broker.service';
 import { GraphUpdateService } from '../../../services/graph-update.service';
-import { CollapseAllNodes, ExpandAllNodes } from '../../../store/actions';
+import { CollapseAllNodes, ExpandAllNodes, ToggleLabel } from '../../../store/actions';
 import { take } from 'rxjs/operators';
 
 @Component({
@@ -25,12 +25,14 @@ export class ParamListComponent implements OnInit, OnDestroy {
     activeLayoutSub: Subscription | undefined;
     loadedLayouts: Set<number>;
     layouts: ILayout[] = [];
+    hideLabel$: Observable<boolean> | undefined;
 
     constructor(private store$: Store<GraphState>, 
                 private configParserService: ConfigParserService, 
                 public notificationBrokerService: NotificationBrokerService,
                 public graphUpdateService: GraphUpdateService) {
         this.loadedLayouts = new Set<number>([]);
+        this.hideLabel$ = this.store$.select(graphSelectors.selectIsHideLabel);
     }
 
     stripText(event: KeyboardEvent) {
@@ -49,6 +51,9 @@ export class ParamListComponent implements OnInit, OnDestroy {
     }
     OnClickAllCollapse() {
         this.store$.dispatch(new CollapseAllNodes());
+    }
+    toggleLabel() {
+        this.store$.dispatch(new ToggleLabel());
     }
     
     ngOnInit() {

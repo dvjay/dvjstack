@@ -183,10 +183,10 @@ export class GraphComponent implements OnInit, OnChanges, AfterViewInit, OnDestr
         console.log("Received external data with 0 nodes");
         return;
       }
-      this.selectRootNodeId$.pipe(take(1)).subscribe((rootNodeIdFromStore: string) => {
-        this.graphUpdateService.positionDeltaNodesFromData(this.rootNodeId, this.dataBuilderService.nwData);
+      combineLatest([this.selectRootNodeId$, this.selectActiveLayout$]).pipe(take(1)).subscribe(([rootNodeIdFromStore, activeLayout]) => {
+        this.graphUpdateService.positionDeltaNodesFromData(this.rootNodeId, this.dataBuilderService.nwData, activeLayout as number);
         if(rootNodeIdFromStore) { //Subset of graph
-          if(this.rootNodeId !== rootNodeIdFromStore) {
+          if(this.rootNodeId !== (rootNodeIdFromStore as string)) {
             this.store$.dispatch(new LoadExternalDeltaData({
               rootNodeId: this.rootNodeId,
               data: this.dataBuilderService.nwData, 

@@ -26,6 +26,7 @@ export function graphReducer(state = getInitialState(), action: Action): State {
             initialState.excludedNodeTypes = state.excludedNodeTypes;
             initialState.rootNodeId = state.rootNodeId;
             initialState.hideLabel = state.hideLabel;
+            initialState.activeLayout = state.activeLayout;
 
             return initialState;
         }
