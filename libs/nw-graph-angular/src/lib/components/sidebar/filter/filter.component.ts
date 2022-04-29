@@ -51,7 +51,8 @@ export class FilterComponent implements OnInit, OnDestroy {
                 if(x.type && x.type.name === this.rootNodeType) { 
                     x.valid = false;
                 }
-            }); 
+            });
+            this.setAllComplete();
         });
     }
     
@@ -75,9 +76,13 @@ export class FilterComponent implements OnInit, OnDestroy {
         }); 
         this.nwNodeTypes = newSubTasks;
     }
+
+    setAllComplete() {
+        this.allComplete = this.nwNodeTypes != null && this.nwNodeTypes.filter(x=> x.valid).every(t => t.included); 
+    }
     
     updateAllComplete() {
-        this.allComplete = this.nwNodeTypes != null && this.nwNodeTypes.filter(x=> x.valid).every(t => t.included); 
+        this.setAllComplete();
         if(this.allComplete) {
             this.store$.dispatch(new ExcludeNodeTypes({excudeNodeTypes: [], currentLayout: this.currentLayout}));
          } else { 
